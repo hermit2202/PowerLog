@@ -1,4 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using PowerLog.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<PowerLogContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 
