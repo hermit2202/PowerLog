@@ -1,4 +1,4 @@
-﻿namespace PowerLog.Core.Models
+namespace PowerLog.Core.Models
 {
     /// <summary>
     /// Модель упражнения
@@ -13,7 +13,7 @@
         /// <summary>
         /// Название упражнения.
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Тип упражнения.
@@ -23,15 +23,15 @@
         /// <summary>
         /// Описание упражнения.
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 
     /// <summary>
     /// Типы упражнений.
     /// </summary>
-    enum ExerciseType
+    public enum ExerciseType
     {
-        Squat, 
+        Squat,
         BenchPress,
         DeadLift,
         Accessory

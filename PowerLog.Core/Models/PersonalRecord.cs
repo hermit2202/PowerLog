@@ -1,4 +1,6 @@
-﻿namespace PowerLog.Core.Models
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace PowerLog.Core.Models
 {
     /// <summary>
     /// Модель персональных рекордов.
@@ -8,7 +10,7 @@
         /// <summary>
         /// Уникальный идентификатор рекорда.
         /// </summary>
-        public Guid RecordId { get; set; }
+        public Guid Id { get; set; }
 
         /// <summary>
         /// Уникальный идентификатор пользователя.
@@ -33,6 +35,7 @@
         /// <summary>
         /// Вес снаряда.
         /// </summary>
+        [Column(TypeName = "decimal(5,2)")]
         public decimal Weight { get; set; }
 
         /// <summary>
