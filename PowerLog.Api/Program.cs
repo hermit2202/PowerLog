@@ -13,6 +13,9 @@ builder.Services.AddScoped<IRepository<Workout>, WorkoutRepository>();
 builder.Services.AddScoped<IRepository<User>, UserRepository>();
 builder.Services.AddScoped<IRepository<Exercise>, ExerciseRepository>();
 builder.Services.AddScoped<IRepository<PersonalRecord>, PersonalRecordRepository>();
+builder.Services.AddScoped<IRepository<WorkoutExercise>, WorkoutExerciseRepository>();
+builder.Services.AddScoped<IRepository<Set>, SetRepository>();
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
