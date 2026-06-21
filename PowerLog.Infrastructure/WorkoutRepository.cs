@@ -7,6 +7,7 @@ namespace PowerLog.Infrastructure
     public class WorkoutRepository : IRepository<Workout>
     {
         private readonly PowerLogContext db;
+
         public WorkoutRepository(PowerLogContext db)
         {
             this.db = db;

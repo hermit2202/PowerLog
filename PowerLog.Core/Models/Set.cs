@@ -15,12 +15,12 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Уникальный идентификатор выполненных упражнений за тренировку.
         /// </summary>
-        public Guid WorkoutExerciseId {  get; set; }
+        public Guid WorkoutExerciseId { get; set; }
 
         /// <summary>
         /// Выполненное упражнения за тренировку.
         /// </summary>
-        public WorkoutExercise WorkoutExercise { get; set; }
+        public WorkoutExercise? WorkoutExercise { get; set; }
 
         /// <summary>
         /// Вес сняряда.

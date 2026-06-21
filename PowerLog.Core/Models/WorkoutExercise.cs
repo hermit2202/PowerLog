@@ -1,4 +1,4 @@
-﻿namespace PowerLog.Core.Models
+namespace PowerLog.Core.Models
 {
     /// <summary>
     /// Модель выполненных упражнений за конкретную тренировку.
@@ -23,12 +23,12 @@
         /// <summary>
         /// Упражнение.
         /// </summary>
-        public Exercise Exercise { get; set; }
+        public Exercise? Exercise { get; set; }
 
         /// <summary>
         /// Тренировка.
         /// </summary>
-        public Workout Workout { get; set; }
+        public Workout? Workout { get; set; }
 
         /// <summary>
         /// Порядок выполнения упражнений.
@@ -38,6 +38,6 @@
         /// <summary>
         /// Количество подходов.
         /// </summary>
-        public List<Set> Sets { get; set; }
+        public List<Set>? Sets { get; set; }
     }
 }
