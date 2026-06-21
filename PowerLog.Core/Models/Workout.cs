@@ -1,4 +1,4 @@
-﻿namespace PowerLog.Core.Models
+namespace PowerLog.Core.Models
 {
     /// <summary>
     /// Модель тренировки.
@@ -18,7 +18,7 @@
         /// <summary>
         /// Пользователь.
         /// </summary>
-        public User User { get; set; }
+        public User? User { get; set; }
 
         /// <summary>
         /// Планируемая дата тренировки.
@@ -33,6 +33,6 @@
         /// <summary>
         /// Сипсок выполнненых упрежнений за тренировку.
         /// </summary>
-        public List<WorkoutExercise> WorkoutExercises { get; set; }
+        public List<WorkoutExercise> WorkoutExercises { get; set; } = new List<WorkoutExercise>();
     }
 }

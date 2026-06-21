@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+using PowerLog.Core.Interfaces;
+using PowerLog.Core.Models;
 using PowerLog.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,24 +9,49 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PowerLogContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
+builder.Services.AddScoped<IRepository<Workout>, WorkoutRepository>();
+builder.Services.AddScoped<IRepository<User>, UserRepository>();
+builder.Services.AddScoped<IRepository<Exercise>, ExerciseRepository>();
+builder.Services.AddScoped<IRepository<PersonalRecord>, PersonalRecordRepository>();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "PowerLog API",
+        Version = "v1"
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Seed данных
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<PowerLogContext>();
+    context.Database.EnsureCreated();
+
+    if (!context.Users.Any())
+    {
+        var testUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        context.Users.Add(new User
+        {
+            UserId = testUserId,
+            UserName = "TestUser"
+        });
+        context.SaveChanges();
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
