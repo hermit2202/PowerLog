@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace PowerLog.Core.Models
 {
     /// <summary>
@@ -13,7 +15,9 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Название упражнения.
         /// </summary>
-        public string? Name { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; }
 
         /// <summary>
         /// Тип упражнения.
@@ -23,6 +27,7 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Описание упражнения.
         /// </summary>
+        [StringLength(500)]
         public string? Description { get; set; }
     }
 

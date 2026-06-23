@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace PowerLog.Core.Models
 {
     /// <summary>
@@ -13,22 +15,24 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Уникальный идентификатор пользователя.
         /// </summary>
+        [Required]
         public Guid UserId { get; set; }
 
         /// <summary>
         /// Пользователь.
         /// </summary>
-        public User? User { get; set; }
+        public User User { get; set; }
 
         /// <summary>
         /// Планируемая дата тренировки.
         /// </summary>
+        [Required]
         public DateTime Planned { get; set; }
 
         /// <summary>
         /// Фактическая дата тренировки.
         /// </summary>
-        public DateTime Actual { get; set; }
+        public DateTime? Actual { get; set; }
 
         /// <summary>
         /// Сипсок выполнненых упрежнений за тренировку.

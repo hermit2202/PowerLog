@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace PowerLog.Core.Models
 {
     /// <summary>
@@ -13,11 +15,13 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Уникальный идентификатор упражнения.
         /// </summary>
+        [Required]
         public Guid ExerciseId { get; set; }
 
         /// <summary>
         /// Уникальный идентификатор тренировки.
         /// </summary>
+        [Required]
         public Guid WorkoutId { get; set; }
 
         /// <summary>
@@ -33,6 +37,7 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Порядок выполнения упражнений.
         /// </summary>
+        [Range(1, 100)]
         public int Order { get; set; }
 
         /// <summary>

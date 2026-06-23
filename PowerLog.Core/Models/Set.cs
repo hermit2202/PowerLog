@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PowerLog.Core.Models
@@ -25,17 +26,21 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Вес сняряда.
         /// </summary>
-        [Column(TypeName = "decimal(5,2)")]
+        [Required]
+        [Column(TypeName = "decimal(6,2)")]
+        [Range(0.00, 2000.00)]
         public decimal Weight { get; set; }
 
         /// <summary>
         /// Количество выполенных повторений.
         /// </summary>
+        [Range(1, 200)]
         public int Reps { get; set; }
 
         /// <summary>
         /// Шкала субъективной оценки усилий во время физической нагрузки.
         /// </summary>
+        [Range(0, 10)]
         public int? RPE { get; set; }
 
     }

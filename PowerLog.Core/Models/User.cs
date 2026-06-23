@@ -1,4 +1,6 @@
-﻿namespace PowerLog.Core.Models
+using System.ComponentModel.DataAnnotations;
+
+namespace PowerLog.Core.Models
 {
     /// <summary>
     /// Модель пользователя.
@@ -13,6 +15,8 @@
         /// <summary>
         /// Имя пользователя.
         /// </summary>
+        [Required]
+        [StringLength(50)]
         public string UserName { get; set; }
 
         /// <summary>
