@@ -37,7 +37,7 @@ namespace PowerLog.Infrastructure
 
         public async Task DeleteAsync(Guid id)
         {
-            PersonalRecord personalRecord = await db.PersonalRecords.FindAsync(id);
+            PersonalRecord? personalRecord = await db.PersonalRecords.FindAsync(id);
             if (personalRecord == null)
             {
                 throw new Exception("Ошибка: рекорд не найден");

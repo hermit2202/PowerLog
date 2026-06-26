@@ -42,6 +42,5 @@ namespace PowerLog.Core.Models
         /// </summary>
         [Range(0, 10)]
         public int? RPE { get; set; }
-
     }
 }

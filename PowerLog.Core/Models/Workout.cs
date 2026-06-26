@@ -21,7 +21,7 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Пользователь.
         /// </summary>
-        public User User { get; set; }
+        public User? User { get; set; }
 
         /// <summary>
         /// Планируемая дата тренировки.

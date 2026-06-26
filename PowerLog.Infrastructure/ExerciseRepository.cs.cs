@@ -37,7 +37,7 @@ namespace PowerLog.Infrastructure
 
         public async Task DeleteAsync(Guid id)
         {
-            Exercise exercise = await db.Exercises.FindAsync(id);
+            Exercise? exercise = await db.Exercises.FindAsync(id);
             if (exercise == null)
             {
                 throw new Exception("Ошибка: упражнение не найдено");

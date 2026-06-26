@@ -11,7 +11,7 @@ namespace PowerLog.Core.Models
         /// <summary>
         /// Уникальный идентификатор рекорда.
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid PersonalRecordId { get; set; }
 
         /// <summary>
         /// Уникальный идентификатор пользователя.

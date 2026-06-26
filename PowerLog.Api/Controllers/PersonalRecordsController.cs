@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PowerLog.Core.DTOs.PersonalRecord;
 using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
 
@@ -16,37 +17,90 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PersonalRecord>>> GetAll()
+        public async Task<ActionResult<IEnumerable<PersonalRecordDto>>> GetAll()
         {
             var personalRecords = await repository.GetAllAsync();
-            return Ok(personalRecords);
+
+            var dtos = personalRecords.Select(p => new PersonalRecordDto
+            {
+                PersonalRecordId = p.PersonalRecordId,
+                UserId = p.UserId,
+                ExerciseId = p.ExerciseId,
+                Weight = p.Weight,
+                Reps = p.Reps,
+                RPE = p.RPE,
+                RecordDate = p.RecordDate,
+            });
+
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PersonalRecord>> GetById(Guid id)
+        public async Task<ActionResult<PersonalRecordDto>> GetById(Guid id)
         {
             var personalRecord = await repository.GetByIdAsync(id);
             if (personalRecord == null)
             {
                 return NotFound();
             }
-            return Ok(personalRecord);
+
+            var dto = new PersonalRecordDto
+            {
+                PersonalRecordId = personalRecord.PersonalRecordId,
+                UserId = personalRecord.UserId,
+                ExerciseId = personalRecord.ExerciseId,
+                Weight = personalRecord.Weight,
+                Reps = personalRecord.Reps,
+                RPE = personalRecord.RPE,
+                RecordDate = personalRecord.RecordDate,
+            };
+
+            return Ok(dto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<PersonalRecord>> Create(PersonalRecord personalRecord)
+        public async Task<ActionResult<PersonalRecordDto>> Create(CreatePersonalRecordDto dto)
         {
+            var personalRecord = new PersonalRecord
+            {
+                UserId = dto.UserId,
+                ExerciseId = dto.ExerciseId,
+                Weight = dto.Weight,
+                Reps = dto.Reps,
+                RPE = dto.RPE,
+                RecordDate = DateTime.UtcNow,
+            };
+
             await repository.CreateAsync(personalRecord);
-            return CreatedAtAction(nameof(GetById), new { id = personalRecord.Id }, personalRecord);
+
+            var resultDto = new PersonalRecordDto
+            {
+                PersonalRecordId = personalRecord.PersonalRecordId,
+                UserId = personalRecord.UserId,
+                ExerciseId = personalRecord.ExerciseId,
+                Weight = personalRecord.Weight,
+                Reps = personalRecord.Reps,
+                RPE = personalRecord.RPE,
+                RecordDate = personalRecord.RecordDate,
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = resultDto.PersonalRecordId }, resultDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, PersonalRecord personalRecord)
+        public async Task<IActionResult> Update(Guid id, UpdatePersonalRecordDto dto)
         {
-            if (personalRecord == null || id != personalRecord.Id)
+            var personalRecord = await repository.GetByIdAsync(id);
+            if (personalRecord == null || id != personalRecord.PersonalRecordId)
             {
                 return BadRequest();
             }
+
+            personalRecord.ExerciseId = dto.ExerciseId;
+            personalRecord.Weight = dto.Weight;
+            personalRecord.Reps = dto.Reps;
+            personalRecord.RPE = dto.RPE;
+
             await repository.UpdateAsync(personalRecord);
             return NoContent();
         }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PowerLog.Core.DTOs.User;
 using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
 
@@ -15,52 +16,82 @@ namespace PowerLog.Api.Controllers
             this.repository = repository;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetAll()
-        {
-            var users = await repository.GetAllAsync();
-            return Ok(users);
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetById(Guid id)
+        public async Task<ActionResult<UserDto>> GetById(Guid id)
         {
             var user = await repository.GetByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
-            return Ok(user);
-        }
 
-        [HttpPost]
-        public async Task<ActionResult<User>> Create(User user)
-        {
-            await repository.CreateAsync(user);
-            return CreatedAtAction(nameof(GetById), new { id = user.UserId }, user);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, User user)
-        {
-            if (user == null || id != user.UserId)
+            var dto = new UserDto
             {
-                return BadRequest();
-            }
-            await repository.UpdateAsync(user);
-            return NoContent();
+                UserId = user.UserId,
+                UserName = user.UserName,
+                Email = user.Email,
+            };
+
+            return Ok(dto);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpPost("register")]
+        public async Task<ActionResult<UserDto>> Register(RegisterDto dto)
         {
-            var user = await repository.GetByIdAsync(id);
-            if (user == null)
+            var existingUser = (await repository.GetAllAsync())
+                .FirstOrDefault(u => u.Email == dto.Email);
+
+            if (existingUser != null)
             {
-                return NotFound();
+                return Conflict("Пользователь с таким email уже существует.");
             }
-            await repository.DeleteAsync(id);
-            return NoContent();
+
+            var newUser = new User
+            {
+                UserId = Guid.NewGuid(),
+                UserName = dto.UserName,
+                Email = dto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            };
+
+            await repository.CreateAsync(newUser);
+
+            var userDto = new UserDto
+            {
+                UserId = newUser.UserId,
+                UserName = dto.UserName,
+                Email = dto.Email,
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = newUser.UserId }, userDto);
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<UserDto>> Login(LoginDto dto)
+        {
+            var existingUser = (await repository.GetAllAsync())
+                .FirstOrDefault(u => u.Email == dto.Email);
+
+            if (existingUser == null)
+            {
+                return Unauthorized("Неверный email или пароль.");
+            }
+
+            var verify = BCrypt.Net.BCrypt.Verify(dto.Password, existingUser.PasswordHash);
+
+            if (verify == false)
+            {
+                return Unauthorized("Неверный email или пароль.");
+            }
+
+            var userDto = new UserDto
+            {
+                UserId = existingUser.UserId,
+                UserName = existingUser.UserName,
+                Email = existingUser.Email,
+            };
+
+            return Ok(userDto);
         }
     }
 }

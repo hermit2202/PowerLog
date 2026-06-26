@@ -52,7 +52,12 @@ namespace PowerLog.Infrastructure
             {
                 throw new Exception("Ошибка: упражнение тренировки не найдено");
             }
-            db.Sets.RemoveRange(workoutExercise.Sets);
+
+            if (workoutExercise.Sets != null)
+            {
+                db.Sets.RemoveRange(workoutExercise.Sets);
+            }
+
             db.WorkoutExercises.Remove(workoutExercise);
             await db.SaveChangesAsync();
         }

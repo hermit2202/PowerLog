@@ -17,16 +17,29 @@ namespace PowerLog.Core.Models
         /// </summary>
         [Required]
         [StringLength(50)]
-        public string UserName { get; set; }
+        public string UserName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Почта.
+        /// </summary>
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Пароль.
+        /// </summary>
+        [Required]
+        public string PasswordHash { get; set; } = string.Empty;
 
         /// <summary>
         /// Персональные рекорды пользователя.
         /// </summary>
-        public List<PersonalRecord> PersonalRecords { get; set; }
+        public List<PersonalRecord> PersonalRecords { get; set; } = new List<PersonalRecord>();
 
         /// <summary>
         /// Список тренировок пользователя.
         /// </summary>
-        public List<Workout> Workouts { get; set; }
+        public List<Workout> Workouts { get; set; } = new List<Workout>();
     }
 }

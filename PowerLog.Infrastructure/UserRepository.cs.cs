@@ -37,7 +37,7 @@ namespace PowerLog.Infrastructure
 
         public async Task DeleteAsync(Guid id)
         {
-            User user = await db.Users.FindAsync(id);
+            User? user = await db.Users.FindAsync(id);
             if (user == null)
             {
                 throw new Exception("Ошибка: пользователь не найден");
