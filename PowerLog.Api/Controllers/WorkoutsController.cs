@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using PowerLog.Core.DTOs.Exercise;
-using PowerLog.Core.DTOs.Set;
 using PowerLog.Core.DTOs.Workout;
-using PowerLog.Core.DTOs.WorkoutExercise;
 using PowerLog.Core.Interfaces;
-using PowerLog.Core.Models;
 
 namespace PowerLog.Api.Controllers
 {
@@ -12,127 +8,79 @@ namespace PowerLog.Api.Controllers
     [Route("api/[controller]")]
     public class WorkoutsController : ControllerBase
     {
-        private readonly IRepository<Workout> repository;
+        private readonly IWorkoutService workoutService;
 
-        public WorkoutsController(IRepository<Workout> repository)
+        public WorkoutsController(IWorkoutService workoutService)
         {
-            this.repository = repository;
+            this.workoutService = workoutService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<WorkoutDto>>> GetAll()
         {
-            var workouts = await repository.GetAllAsync();
-
-            var dtos = workouts.Select(w => new WorkoutDto
+            try
             {
-                WorkoutId = w.WorkoutId,
-                UserId = w.UserId,
-                Planned = w.Planned,
-                Actual = w.Actual,
-                Exercises = w.WorkoutExercises?.Select(e => new WorkoutExerciseDto
-                {
-                    ExerciseId = e.ExerciseId,
-                    WorkoutExerciseId = e.WorkoutExerciseId,
-                    WorkoutId = e.WorkoutId,
-                    Order = e.Order,
-                    Sets = e.Sets?.Select(s => new SetDto
-                    {
-                        SetId = s.SetId,
-                        Weight = s.Weight,
-                        Reps = s.Reps,
-                        RPE = s.RPE,
-                    }).ToList() ?? new List<SetDto>(),
-                }).ToList() ?? new List<WorkoutExerciseDto>(),
-            });
-
-            return Ok(dtos);
+                var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                var workouts = await workoutService.GetAllAsync(userId);
+                return Ok(workouts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ошибка при получении тренировок: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<WorkoutDto>> GetById(Guid id)
         {
-            var workout = await repository.GetByIdAsync(id);
-            if (workout == null)
+            try
             {
-                return NotFound();
+                var workout = await workoutService.GetByIdAsync(id);
+                return Ok(workout);
             }
-
-            var dto = new WorkoutDto
+            catch (Exception ex)
             {
-                WorkoutId = workout.WorkoutId,
-                UserId = workout.UserId,
-                Planned = workout.Planned,
-                Actual = workout.Actual,
-                Exercises = workout.WorkoutExercises?.Select(e => new WorkoutExerciseDto
-                {
-                    ExerciseId = e.ExerciseId,
-                    WorkoutExerciseId = e.WorkoutExerciseId,
-                    WorkoutId = e.WorkoutId,
-                    Order = e.Order,
-                    Sets = e.Sets?.Select(s => new SetDto
-                    {
-                        SetId = s.SetId,
-                        Weight = s.Weight,
-                        Reps = s.Reps,
-                        RPE = s.RPE,
-                    }).ToList() ?? new List<SetDto>(),
-                }).ToList() ?? new List<WorkoutExerciseDto>(),
-            };
-
-            return Ok(dto);
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<WorkoutDto>> Create(CreateWorkoutDto dto)
         {
-            var workout = new Workout
+            try
             {
-                UserId = dto.UserId,
-                Planned = dto.Planned,
-                Actual = dto.Actual,
-            };
-
-            await repository.CreateAsync(workout);
-
-            var resultDto = new WorkoutDto
+                var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                var workout = await workoutService.CreateAsync(dto, userId);
+                return CreatedAtAction(nameof(GetById), new { id = workout.WorkoutId }, workout);
+            }
+            catch (Exception ex)
             {
-                WorkoutId = workout.WorkoutId,
-                UserId = workout.UserId,
-                Planned = workout.Planned,
-                Actual = workout.Actual,
-                Exercises = new List<WorkoutExerciseDto>(),
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = resultDto.WorkoutId }, resultDto);
+                return StatusCode(400, $"Ошибка при создании тренировки: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdateWorkoutDto dto)
         {
-            var workout = await repository.GetByIdAsync(id);
-
-            if (workout == null || id != workout.WorkoutId)
+            try
             {
-                return BadRequest();
+                var workout = await workoutService.UpdateAsync(dto, id);
+                return Ok(workout);
             }
-
-            workout.Planned = dto.Planned;
-            workout.Actual = dto.Actual;
-
-            await repository.UpdateAsync(workout);
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(404, $"Ошибка при обнавлении тренировки: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var workout = await repository.GetByIdAsync(id);
-            if (workout == null)
+            var success = await workoutService.DeleteAsync(id);
+            if (!success)
             {
                 return NotFound();
             }
-            await repository.DeleteAsync(id);
             return NoContent();
         }
     }

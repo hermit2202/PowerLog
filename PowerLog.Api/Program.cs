@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
+using PowerLog.Core.Services;
 using PowerLog.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddScoped<IRepository<PersonalRecord>, PersonalRecordRepository
 builder.Services.AddScoped<IRepository<WorkoutExercise>, WorkoutExerciseRepository>();
 builder.Services.AddScoped<IRepository<Set>, SetRepository>();
 
+builder.Services.AddScoped<IWorkoutService, WorkoutService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
