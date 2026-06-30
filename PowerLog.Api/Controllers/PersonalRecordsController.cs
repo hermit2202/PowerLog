@@ -9,111 +9,80 @@ namespace PowerLog.Api.Controllers
     [Route("api/[controller]")]
     public class PersonalRecordsController : ControllerBase
     {
-        private readonly IRepository<PersonalRecord> repository;
+        private readonly IExerciseService personalRecordService;
 
-        public PersonalRecordsController(IRepository<PersonalRecord> repository)
+        public PersonalRecordsController(IExerciseService personalRecordService)
         {
-            this.repository = repository;
+            this.personalRecordService = personalRecordService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PersonalRecordDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<PersonalRecordDto>>> GetAll(Guid exerciseId)
         {
-            var personalRecords = await repository.GetAllAsync();
-
-            var dtos = personalRecords.Select(p => new PersonalRecordDto
+            try
             {
-                PersonalRecordId = p.PersonalRecordId,
-                UserId = p.UserId,
-                ExerciseId = p.ExerciseId,
-                Weight = p.Weight,
-                Reps = p.Reps,
-                RPE = p.RPE,
-                RecordDate = p.RecordDate,
-            });
-
-            return Ok(dtos);
+                var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                var personalRecords = await personalRecordService.GetAllPersonalRecordsAsync(userId, exerciseId);
+                return Ok(personalRecords);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ошибка при полчении персональных рекордов: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PersonalRecordDto>> GetById(Guid id)
         {
-            var personalRecord = await repository.GetByIdAsync(id);
-            if (personalRecord == null)
+            try
             {
-                return NotFound();
+                var dto = await personalRecordService.GetPersonalRecordByIdAsync(id);
+                return Ok(dto);
+
             }
-
-            var dto = new PersonalRecordDto
+            catch (Exception ex)
             {
-                PersonalRecordId = personalRecord.PersonalRecordId,
-                UserId = personalRecord.UserId,
-                ExerciseId = personalRecord.ExerciseId,
-                Weight = personalRecord.Weight,
-                Reps = personalRecord.Reps,
-                RPE = personalRecord.RPE,
-                RecordDate = personalRecord.RecordDate,
-            };
-
-            return Ok(dto);
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<PersonalRecordDto>> Create(CreatePersonalRecordDto dto)
         {
-            var personalRecord = new PersonalRecord
+            try
             {
-                UserId = dto.UserId,
-                ExerciseId = dto.ExerciseId,
-                Weight = dto.Weight,
-                Reps = dto.Reps,
-                RPE = dto.RPE,
-                RecordDate = DateTime.UtcNow,
-            };
-
-            await repository.CreateAsync(personalRecord);
-
-            var resultDto = new PersonalRecordDto
+                var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                var personalRecord = await personalRecordService.CreatePersonalRecordAsync(dto, userId);
+                return CreatedAtAction(nameof(GetById), new { id = personalRecord.PersonalRecordId }, personalRecord);
+            }
+            catch (Exception ex)
             {
-                PersonalRecordId = personalRecord.PersonalRecordId,
-                UserId = personalRecord.UserId,
-                ExerciseId = personalRecord.ExerciseId,
-                Weight = personalRecord.Weight,
-                Reps = personalRecord.Reps,
-                RPE = personalRecord.RPE,
-                RecordDate = personalRecord.RecordDate,
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = resultDto.PersonalRecordId }, resultDto);
+                return StatusCode(400, $"Ошибка при создании пресонального рекорда: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdatePersonalRecordDto dto)
         {
-            var personalRecord = await repository.GetByIdAsync(id);
-            if (personalRecord == null || id != personalRecord.PersonalRecordId)
+            try
             {
-                return BadRequest();
+                var personalRecord = await personalRecordService.UpdatePersonalRecordAsync(dto, id);
+                return NoContent();
             }
-
-            personalRecord.ExerciseId = dto.ExerciseId;
-            personalRecord.Weight = dto.Weight;
-            personalRecord.Reps = dto.Reps;
-            personalRecord.RPE = dto.RPE;
-
-            await repository.UpdateAsync(personalRecord);
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var personalRecord = await repository.GetByIdAsync(id);
-            if (personalRecord == null)
+            var success = await personalRecordService.DeletePersonalRecordAsync(id);
+            if (!success)
             {
                 return NotFound();
             }
-            await repository.DeleteAsync(id);
             return NoContent();
         }
     }

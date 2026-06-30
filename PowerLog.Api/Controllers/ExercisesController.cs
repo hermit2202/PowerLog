@@ -9,98 +9,77 @@ namespace PowerLog.Api.Controllers
     [Route("api/[controller]")]
     public class ExercisesController : ControllerBase
     {
-        private readonly IRepository<Exercise> repository;
+        private readonly IExerciseService exerciseService;
 
-        public ExercisesController(IRepository<Exercise> repository)
+        public ExercisesController(IExerciseService exerciseService)
         {
-            this.repository = repository;
+            this.exerciseService = exerciseService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExerciseDto>>> GetAll()
         {
-            var exercises = await repository.GetAllAsync();
-
-            var dtos = exercises.Select(e => new ExerciseDto
+            try
             {
-                ExerciseId = e.ExerciseId,
-                Name = e.Name,
-                Type = e.Type,
-                Description = e.Description,
-            });
-
-            return Ok(dtos);
+                var dtos = await exerciseService.GetAllExerciseAsync();
+                return Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ошибка при получении упражнений: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ExerciseDto>> GetById(Guid id)
         {
-            var exercise = await repository.GetByIdAsync(id);
-            if (exercise == null)
+            try
             {
-                return NotFound();
+                var dto = await exerciseService.GetExerciseByIdAsync(id);
+                return Ok(dto);
             }
-
-            var dto = new ExerciseDto
+            catch (Exception ex)
             {
-                ExerciseId = exercise.ExerciseId,
-                Name = exercise.Name,
-                Type = exercise.Type,
-                Description = exercise.Description,
-            };
-
-            return Ok(dto);
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<ExerciseDto>> Create(CreateExerciseDto dto)
         {
-            var exercise = new Exercise
+            try
             {
-                Name = dto.Name,
-                Type = dto.Type,
-                Description = dto.Description,
-            };
-
-            await repository.CreateAsync(exercise);
-
-            var resultDto = new ExerciseDto
+                var exercise = await exerciseService.CreateExerciseAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = exercise.ExerciseId }, exercise);
+            }
+            catch (Exception ex)
             {
-                ExerciseId = exercise.ExerciseId,
-                Name = exercise.Name,
-                Type = exercise.Type,
-                Description = exercise.Description,
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = resultDto.ExerciseId }, resultDto);
+                return StatusCode(400, $"Ошибка при создании упражнения: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdateExerciseDto dto)
         {
-            var exercise = await repository.GetByIdAsync(id);
-            if (exercise == null)
+            try
             {
-                return NotFound();
+                var exercise = await exerciseService.UpdateExerciseAsync(dto, id);
+                return Ok(exercise);
             }
-
-            exercise.Name = dto.Name;
-            exercise.Type = dto.Type;
-            exercise.Description = dto.Description;
-
-            await repository.UpdateAsync(exercise);
-            return NoContent();
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var exercise = await repository.GetByIdAsync(id);
-            if (exercise == null)
+            var success = await exerciseService.DeleteExerciseAsync(id);
+            if (!success)
             {
                 return NotFound();
             }
-            await repository.DeleteAsync(id);
             return NoContent();
         }
     }

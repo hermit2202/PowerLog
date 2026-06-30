@@ -18,6 +18,8 @@ builder.Services.AddScoped<IRepository<WorkoutExercise>, WorkoutExerciseReposito
 builder.Services.AddScoped<IRepository<Set>, SetRepository>();
 
 builder.Services.AddScoped<IWorkoutService, WorkoutService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IExerciseService, ExerciseService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -29,14 +31,24 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1"
     });
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 // Seed данных
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<PowerLogContext>();
-    context.Database.EnsureCreated();
 
     if (!context.Users.Any())
     {
@@ -44,7 +56,9 @@ using (var scope = app.Services.CreateScope())
         context.Users.Add(new User
         {
             UserId = testUserId,
-            UserName = "TestUser"
+            UserName = "TestUser",
+            Email = "test@example.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
         });
         context.SaveChanges();
     }

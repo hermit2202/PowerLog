@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PowerLog.Core.DTOs.User;
 using PowerLog.Core.Interfaces;
-using PowerLog.Core.Models;
 
 namespace PowerLog.Api.Controllers
 {
@@ -9,89 +8,53 @@ namespace PowerLog.Api.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly IRepository<User> repository;
+        private readonly IUserService userService;
 
-        public UsersController(IRepository<User> repository)
+        public UsersController(IUserService userService)
         {
-            this.repository = repository;
+            this.userService = userService;
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetById(Guid id)
         {
-            var user = await repository.GetByIdAsync(id);
-            if (user == null)
+            try
             {
-                return NotFound();
+                var dto = await userService.GetById(id);
+                return Ok(dto);
             }
-
-            var dto = new UserDto
+            catch (Exception ex)
             {
-                UserId = user.UserId,
-                UserName = user.UserName,
-                Email = user.Email,
-            };
-
-            return Ok(dto);
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto dto)
         {
-            var existingUser = (await repository.GetAllAsync())
-                .FirstOrDefault(u => u.Email == dto.Email);
-
-            if (existingUser != null)
+            try
             {
-                return Conflict("Пользователь с таким email уже существует.");
+                var userDto = await userService.Register(dto);
+                return CreatedAtAction(nameof(GetById), new { id = userDto.UserId }, userDto);
             }
-
-            var newUser = new User
+            catch (Exception ex)
             {
-                UserId = Guid.NewGuid(),
-                UserName = dto.UserName,
-                Email = dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            };
-
-            await repository.CreateAsync(newUser);
-
-            var userDto = new UserDto
-            {
-                UserId = newUser.UserId,
-                UserName = dto.UserName,
-                Email = dto.Email,
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = newUser.UserId }, userDto);
+                return Conflict(ex.Message);
+            }
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto dto)
         {
-            var existingUser = (await repository.GetAllAsync())
-                .FirstOrDefault(u => u.Email == dto.Email);
-
-            if (existingUser == null)
+            try
             {
-                return Unauthorized("Неверный email или пароль.");
+                var userDto = await userService.Login(dto);
+                return Ok(userDto);
             }
-
-            var verify = BCrypt.Net.BCrypt.Verify(dto.Password, existingUser.PasswordHash);
-
-            if (verify == false)
+            catch (Exception ex)
             {
-                return Unauthorized("Неверный email или пароль.");
+                return Unauthorized(ex.Message);
             }
-
-            var userDto = new UserDto
-            {
-                UserId = existingUser.UserId,
-                UserName = existingUser.UserName,
-                Email = existingUser.Email,
-            };
-
-            return Ok(userDto);
         }
     }
 }
