@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PowerLog.Core.DTOs.User;
 using PowerLog.Core.Interfaces;
@@ -15,6 +16,7 @@ namespace PowerLog.Api.Controllers
             this.userService = userService;
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetById(Guid id)
         {
@@ -44,12 +46,12 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto dto)
+        public async Task<ActionResult<LoginResponseDto>> Login(LoginDto dto)
         {
             try
             {
-                var userDto = await userService.Login(dto);
-                return Ok(userDto);
+                var response = await userService.Login(dto);
+                return Ok(response);
             }
             catch (Exception ex)
             {

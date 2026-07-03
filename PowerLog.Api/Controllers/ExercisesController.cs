@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PowerLog.Core.DTOs.Exercise;
 using PowerLog.Core.Interfaces;
@@ -5,6 +6,7 @@ using PowerLog.Core.Models;
 
 namespace PowerLog.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ExercisesController : ControllerBase

@@ -1,9 +1,12 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PowerLog.Core.DTOs.Workout;
 using PowerLog.Core.Interfaces;
 
 namespace PowerLog.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class WorkoutsController : ControllerBase
@@ -20,7 +23,12 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                var userId = Guid.Parse(
+                    User.FindFirstValue(ClaimTypes.NameIdentifier)
+                    ??
+                    throw new InvalidOperationException("User ID not found in token.")
+                    );
+
                 var workouts = await workoutService.GetAllAsync(userId);
                 return Ok(workouts);
             }
@@ -49,7 +57,12 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                var userId = Guid.Parse(
+                    User.FindFirstValue(ClaimTypes.NameIdentifier)
+                    ??
+                    throw new InvalidOperationException("User ID not found in token.")
+                    );
+
                 var workout = await workoutService.CreateAsync(dto, userId);
                 return CreatedAtAction(nameof(GetById), new { id = workout.WorkoutId }, workout);
             }

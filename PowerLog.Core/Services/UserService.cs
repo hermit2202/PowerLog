@@ -7,10 +7,12 @@ namespace PowerLog.Core.Services
     public class UserService : IUserService
     {
         private readonly IRepository<User> repository;
+        private readonly AuthService authService;
 
-        public UserService(IRepository<User> repository)
+        public UserService(IRepository<User> repository, AuthService authService)
         {
             this.repository = repository;
+            this.authService = authService;
         }
 
         public async Task<UserDto> GetById(Guid id)
@@ -31,7 +33,7 @@ namespace PowerLog.Core.Services
             return dto;
         }
 
-        public async Task<UserDto> Login(LoginDto dto)
+        public async Task<LoginResponseDto> Login(LoginDto dto)
         {
             var existingUser = (await repository.GetAllAsync())
                 .FirstOrDefault(u => u.Email == dto.Email);
@@ -48,14 +50,15 @@ namespace PowerLog.Core.Services
                 throw new Exception("Неверный email или пароль.");
             }
 
-            var userDto = new UserDto
+            var token = authService.GenerateToken(existingUser);
+
+            return new LoginResponseDto
             {
                 UserId = existingUser.UserId,
                 UserName = existingUser.UserName,
                 Email = existingUser.Email,
+                JwtToken = token,
             };
-
-            return userDto;
         }
 
         public async Task<UserDto> Register(RegisterDto dto)

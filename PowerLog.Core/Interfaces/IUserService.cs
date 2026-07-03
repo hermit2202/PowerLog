@@ -6,6 +6,6 @@ namespace PowerLog.Core.Interfaces
     {
         Task<UserDto> GetById(Guid id);
         Task<UserDto> Register(RegisterDto dto);
-        Task<UserDto> Login(LoginDto dto);
+        Task<LoginResponseDto> Login(LoginDto dto);
     }
 }

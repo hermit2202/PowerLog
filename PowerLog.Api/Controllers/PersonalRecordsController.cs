@@ -1,10 +1,12 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PowerLog.Core.DTOs.PersonalRecord;
 using PowerLog.Core.Interfaces;
-using PowerLog.Core.Models;
 
 namespace PowerLog.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PersonalRecordsController : ControllerBase
@@ -21,7 +23,11 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                var userId = Guid.Parse(
+                    User.FindFirstValue(ClaimTypes.NameIdentifier)
+                    ?? throw new InvalidOperationException("User ID not found in token.")
+                    );
+
                 var personalRecords = await personalRecordService.GetAllPersonalRecordsAsync(userId, exerciseId);
                 return Ok(personalRecords);
             }
@@ -51,7 +57,11 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                var userId = Guid.Parse(
+                    User.FindFirstValue(ClaimTypes.NameIdentifier)
+                    ?? throw new InvalidOperationException("User ID not found in token.")
+                    );
+
                 var personalRecord = await personalRecordService.CreatePersonalRecordAsync(dto, userId);
                 return CreatedAtAction(nameof(GetById), new { id = personalRecord.PersonalRecordId }, personalRecord);
             }
