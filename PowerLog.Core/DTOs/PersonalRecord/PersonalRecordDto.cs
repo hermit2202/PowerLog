@@ -12,7 +12,7 @@ namespace PowerLog.Core.DTOs.PersonalRecord
 
         public int Reps { get; set; }
 
-        public int? RPE { get; set; }
+        public int? Rpe { get; set; }
 
         public DateTime RecordDate { get; set; }
     }

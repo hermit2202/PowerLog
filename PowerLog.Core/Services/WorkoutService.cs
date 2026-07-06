@@ -37,7 +37,7 @@ namespace PowerLog.Core.Services
                         SetId = s.SetId,
                         Weight = s.Weight,
                         Reps = s.Reps,
-                        RPE = s.RPE,
+                        Rpe = s.Rpe,
                     }).ToList() ?? new List<SetDto>(),
                 }).ToList() ?? new List<WorkoutExerciseDto>(),
             });
@@ -70,7 +70,7 @@ namespace PowerLog.Core.Services
                         SetId = s.SetId,
                         Weight = s.Weight,
                         Reps = s.Reps,
-                        RPE = s.RPE,
+                        Rpe = s.Rpe,
                     }).ToList() ?? new List<SetDto>(),
                 }).ToList() ?? new List<WorkoutExerciseDto>(),
             };
