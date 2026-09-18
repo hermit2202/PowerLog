@@ -41,6 +41,6 @@ namespace PowerLog.Core.Models
         /// Шкала субъективной оценки усилий во время физической нагрузки.
         /// </summary>
         [Range(0, 10)]
-        public int? RPE { get; set; }
+        public int? Rpe { get; set; }
     }
 }

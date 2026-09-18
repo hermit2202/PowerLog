@@ -117,7 +117,7 @@ namespace PowerLog.Core.Services
                 ExerciseId = p.ExerciseId,
                 Weight = p.Weight,
                 Reps = p.Reps,
-                RPE = p.RPE,
+                Rpe = p.Rpe,
                 RecordDate = p.RecordDate,
             });
         }
@@ -137,7 +137,7 @@ namespace PowerLog.Core.Services
                 ExerciseId = personalRecord.ExerciseId,
                 Weight = personalRecord.Weight,
                 Reps = personalRecord.Reps,
-                RPE = personalRecord.RPE,
+                Rpe = personalRecord.Rpe,
                 RecordDate = personalRecord.RecordDate,
             };
         }
@@ -150,7 +150,7 @@ namespace PowerLog.Core.Services
                 ExerciseId = dto.ExerciseId,
                 Weight = dto.Weight,
                 Reps = dto.Reps,
-                RPE = dto.RPE,
+                Rpe = dto.Rpe,
                 RecordDate = DateTime.UtcNow,
             };
 
@@ -163,7 +163,7 @@ namespace PowerLog.Core.Services
                 ExerciseId = personalRecord.ExerciseId,
                 Weight = personalRecord.Weight,
                 Reps = personalRecord.Reps,
-                RPE = personalRecord.RPE,
+                Rpe = personalRecord.Rpe,
                 RecordDate = personalRecord.RecordDate,
             };
         }
@@ -179,7 +179,7 @@ namespace PowerLog.Core.Services
             personalRecord.ExerciseId = dto.ExerciseId;
             personalRecord.Weight = dto.Weight;
             personalRecord.Reps = dto.Reps;
-            personalRecord.RPE = dto.RPE;
+            personalRecord.Rpe = dto.Rpe;
 
             await personalRecordRepository.UpdateAsync(personalRecord);
 
@@ -189,7 +189,7 @@ namespace PowerLog.Core.Services
                 ExerciseId = personalRecord.ExerciseId,
                 UserId = personalRecord.UserId,
                 Weight = personalRecord.Weight,
-                RPE = personalRecord.RPE,
+                Rpe = personalRecord.Rpe,
                 Reps = personalRecord.Reps,
                 RecordDate = personalRecord.RecordDate
             };

@@ -15,6 +15,6 @@ namespace PowerLog.Core.DTOs.PersonalRecord
         public int Reps { get; set; }
 
         [Range(0, 10)]
-        public int RPE { get; set; }
+        public int Rpe { get; set; }
     }
 }
