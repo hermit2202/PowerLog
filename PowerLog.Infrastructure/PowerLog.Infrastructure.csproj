@@ -19,4 +19,8 @@
     <ProjectReference Include="..\PowerLog.Core\PowerLog.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\Configurations\" />
+  </ItemGroup>
+
 </Project>
