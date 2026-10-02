@@ -2,11 +2,11 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
 using PowerLog.Core.Services;
 using PowerLog.Infrastructure;
+using PowerLog.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +19,12 @@ builder.Services.AddScoped<IRepository<Exercise>, ExerciseRepository>();
 builder.Services.AddScoped<IRepository<PersonalRecord>, PersonalRecordRepository>();
 builder.Services.AddScoped<IRepository<WorkoutExercise>, WorkoutExerciseRepository>();
 builder.Services.AddScoped<IRepository<Set>, SetRepository>();
+builder.Services.AddScoped<IRepository<CoachClient>, CoachClientRepository>();
 
 builder.Services.AddScoped<IWorkoutService, WorkoutService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
+builder.Services.AddScoped<ICoachService, CoachService>();
 builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddControllers();

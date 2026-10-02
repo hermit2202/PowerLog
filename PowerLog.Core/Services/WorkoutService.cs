@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using PowerLog.Core.DTOs.Set;
 using PowerLog.Core.DTOs.Workout;
 using PowerLog.Core.DTOs.WorkoutExercise;
@@ -133,6 +134,5 @@ namespace PowerLog.Core.Services
             await repository.DeleteAsync(id);
             return true;
         }
-
     }
 }

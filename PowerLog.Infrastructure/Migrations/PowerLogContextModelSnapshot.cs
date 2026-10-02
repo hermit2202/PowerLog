@@ -22,6 +22,30 @@ namespace PowerLog.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("PowerLog.Core.Models.CoachClient", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CoachId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("CoachId");
+
+                    b.ToTable("CoachClients");
+                });
+
             modelBuilder.Entity("PowerLog.Core.Models.Exercise", b =>
                 {
                     b.Property<Guid>("ExerciseId")
@@ -54,13 +78,13 @@ namespace PowerLog.Infrastructure.Migrations
                     b.Property<Guid>("ExerciseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("RPE")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("RecordDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Reps")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rpe")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
@@ -84,10 +108,10 @@ namespace PowerLog.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("RPE")
+                    b.Property<int>("Reps")
                         .HasColumnType("int");
 
-                    b.Property<int>("Reps")
+                    b.Property<int?>("Rpe")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Weight")
@@ -116,6 +140,9 @@ namespace PowerLog.Infrastructure.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -171,6 +198,25 @@ namespace PowerLog.Infrastructure.Migrations
                     b.HasIndex("WorkoutId");
 
                     b.ToTable("WorkoutExercises");
+                });
+
+            modelBuilder.Entity("PowerLog.Core.Models.CoachClient", b =>
+                {
+                    b.HasOne("PowerLog.Core.Models.User", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("PowerLog.Core.Models.User", "Coach")
+                        .WithMany()
+                        .HasForeignKey("CoachId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Coach");
                 });
 
             modelBuilder.Entity("PowerLog.Core.Models.PersonalRecord", b =>

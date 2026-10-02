@@ -41,5 +41,10 @@ namespace PowerLog.Core.Models
         /// Список тренировок пользователя.
         /// </summary>
         public List<Workout> Workouts { get; set; } = new List<Workout>();
+
+        /// <summary>
+        /// Роль пользователя: спортсмен или тренер.
+        /// </summary>
+        public UserRole Role { get; set; }
     }
 }

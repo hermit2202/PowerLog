@@ -30,6 +30,7 @@ namespace PowerLog.Core.Services
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, "Coach"),
             };
 
             var token = new JwtSecurityToken(

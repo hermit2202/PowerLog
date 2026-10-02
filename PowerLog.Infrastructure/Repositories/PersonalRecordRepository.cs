@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
 
-namespace PowerLog.Infrastructure
+namespace PowerLog.Infrastructure.Repositories
 {
     public class PersonalRecordRepository : IRepository<PersonalRecord>
     {
