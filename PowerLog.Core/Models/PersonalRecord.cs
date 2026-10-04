@@ -6,7 +6,7 @@ namespace PowerLog.Core.Models
     /// <summary>
     /// Модель персональных рекордов.
     /// </summary>
-    public class PersonalRecord
+    public class PersonalRecord : IEntity
     {
         /// <summary>
         /// Уникальный идентификатор рекорда.

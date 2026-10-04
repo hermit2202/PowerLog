@@ -18,11 +18,11 @@ namespace PowerLog.Api.Controllers
 
         [Authorize]
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetById(Guid id)
+        public async Task<ActionResult<UserDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
             try
             {
-                var dto = await userService.GetById(id);
+                var dto = await userService.GetById(id, cancellationToken);
                 return Ok(dto);
             }
             catch (Exception ex)
@@ -32,11 +32,11 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterDto dto)
+        public async Task<ActionResult<UserDto>> Register(RegisterDto dto, CancellationToken cancellationToken)
         {
             try
             {
-                var userDto = await userService.Register(dto);
+                var userDto = await userService.Register(dto, cancellationToken);
                 return CreatedAtAction(nameof(GetById), new { id = userDto.UserId }, userDto);
             }
             catch (Exception ex)
@@ -46,11 +46,11 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponseDto>> Login(LoginDto dto)
+        public async Task<ActionResult<LoginResponseDto>> Login(LoginDto dto, CancellationToken cancellationToken)
         {
             try
             {
-                var response = await userService.Login(dto);
+                var response = await userService.Login(dto, cancellationToken);
                 return Ok(response);
             }
             catch (Exception ex)

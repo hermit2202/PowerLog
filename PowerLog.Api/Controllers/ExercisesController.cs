@@ -19,11 +19,11 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ExerciseDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ExerciseDto>>> GetAll(CancellationToken cancellationToken)
         {
             try
             {
-                var dtos = await exerciseService.GetAllExerciseAsync();
+                var dtos = await exerciseService.GetAllExerciseAsync(cancellationToken);
                 return Ok(dtos);
             }
             catch (Exception ex)
@@ -33,11 +33,11 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ExerciseDto>> GetById(Guid id)
+        public async Task<ActionResult<ExerciseDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
             try
             {
-                var dto = await exerciseService.GetExerciseByIdAsync(id);
+                var dto = await exerciseService.GetExerciseByIdAsync(id, cancellationToken);
                 return Ok(dto);
             }
             catch (Exception ex)
@@ -47,11 +47,11 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ExerciseDto>> Create(CreateExerciseDto dto)
+        public async Task<ActionResult<ExerciseDto>> Create(CreateExerciseDto dto, CancellationToken cancellationToken)
         {
             try
             {
-                var exercise = await exerciseService.CreateExerciseAsync(dto);
+                var exercise = await exerciseService.CreateExerciseAsync(dto, cancellationToken);
                 return CreatedAtAction(nameof(GetById), new { id = exercise.ExerciseId }, exercise);
             }
             catch (Exception ex)
@@ -61,11 +61,11 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, UpdateExerciseDto dto)
+        public async Task<IActionResult> Update(Guid id, UpdateExerciseDto dto, CancellationToken cancellationToken)
         {
             try
             {
-                var exercise = await exerciseService.UpdateExerciseAsync(dto, id);
+                var exercise = await exerciseService.UpdateExerciseAsync(dto, id, cancellationToken);
                 return Ok(exercise);
             }
             catch (Exception ex)
@@ -75,9 +75,9 @@ namespace PowerLog.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            var success = await exerciseService.DeleteExerciseAsync(id);
+            var success = await exerciseService.DeleteExerciseAsync(id, cancellationToken);
             if (!success)
             {
                 return NotFound();

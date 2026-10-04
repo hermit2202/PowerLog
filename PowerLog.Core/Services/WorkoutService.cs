@@ -1,6 +1,6 @@
-using PowerLog.Core.DTOs.Set;
+using AutoMapper;
+using PowerLog.Core.Contracts.Data;
 using PowerLog.Core.DTOs.Workout;
-using PowerLog.Core.DTOs.WorkoutExercise;
 using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
 
@@ -8,131 +8,79 @@ namespace PowerLog.Core.Services
 {
     public class WorkoutService : IWorkoutService
     {
-        private readonly IRepository<Workout> repository;
+        private readonly IWorkoutRepository workoutRepository;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IMapper mapper;
 
-        public WorkoutService(IRepository<Workout> repository)
+        public WorkoutService(
+            IWorkoutRepository workoutRepository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
-            this.repository = repository;
+            this.workoutRepository = workoutRepository;
+            this.unitOfWork = unitOfWork;
+            this.mapper = mapper;
         }
 
-        public async Task<IEnumerable<WorkoutDto>> GetAllAsync(Guid userId)
+        public async Task<IEnumerable<WorkoutDto>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            var workouts = (await repository.GetAllAsync())
-                .Where(u => u.UserId == userId);
-
-            var dtos = workouts.Select(w => new WorkoutDto
-            {
-                WorkoutId = w.WorkoutId,
-                UserId = w.UserId,
-                Planned = w.Planned,
-                Actual = w.Actual,
-                Exercises = w.WorkoutExercises?.Select(e => new WorkoutExerciseDto
-                {
-                    ExerciseId = e.ExerciseId,
-                    WorkoutExerciseId = e.WorkoutExerciseId,
-                    WorkoutId = e.WorkoutId,
-                    Order = e.Order,
-                    Sets = e.Sets?.Select(s => new SetDto
-                    {
-                        SetId = s.SetId,
-                        Weight = s.Weight,
-                        Reps = s.Reps,
-                        Rpe = s.Rpe,
-                    }).ToList() ?? new List<SetDto>(),
-                }).ToList() ?? new List<WorkoutExerciseDto>(),
-            });
-
-            return dtos;
+            var workouts = await workoutRepository.GetByUserIdAsync(userId, cancellationToken);
+            return mapper.Map<IEnumerable<WorkoutDto>>(workouts);
         }
 
-        public async Task<WorkoutDto> GetByIdAsync(Guid id)
+        public async Task<WorkoutDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var workout = await repository.GetByIdAsync(id);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+
             if (workout == null)
             {
                 throw new Exception("Такая тренировка не найдена.");
             }
 
-            var dto = new WorkoutDto
-            {
-                WorkoutId = workout.WorkoutId,
-                UserId = workout.UserId,
-                Planned = workout.Planned,
-                Actual = workout.Actual,
-                Exercises = workout.WorkoutExercises?.Select(e => new WorkoutExerciseDto
-                {
-                    ExerciseId = e.ExerciseId,
-                    WorkoutExerciseId = e.WorkoutExerciseId,
-                    WorkoutId = e.WorkoutId,
-                    Order = e.Order,
-                    Sets = e.Sets?.Select(s => new SetDto
-                    {
-                        SetId = s.SetId,
-                        Weight = s.Weight,
-                        Reps = s.Reps,
-                        Rpe = s.Rpe,
-                    }).ToList() ?? new List<SetDto>(),
-                }).ToList() ?? new List<WorkoutExerciseDto>(),
-            };
-
-            return dto;
+            return mapper.Map<WorkoutDto>(workout);
         }
 
-        public async Task<WorkoutDto> CreateAsync(CreateWorkoutDto dto, Guid userId)
+        public async Task<WorkoutDto> CreateAsync(CreateWorkoutDto dto, Guid userId, CancellationToken cancellationToken = default)
         {
-            var workout = new Workout
-            {
-                UserId = userId,
-                Planned = dto.Planned,
-                Actual = dto.Actual,
-            };
+            var workout = mapper.Map<Workout>(dto);
+            workout.UserId = userId;
 
-            await repository.CreateAsync(workout);
+            workoutRepository.Add(workout);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var resultDto = new WorkoutDto
-            {
-                WorkoutId = workout.WorkoutId,
-                UserId = workout.UserId,
-                Planned = workout.Planned,
-                Actual = workout.Actual,
-                Exercises = new List<WorkoutExerciseDto>(),
-            };
-
-            return resultDto;
+            return mapper.Map<WorkoutDto>(workout);
         }
 
-        public async Task<WorkoutDto> UpdateAsync(UpdateWorkoutDto dto, Guid id)
+        public async Task<WorkoutDto> UpdateAsync(UpdateWorkoutDto dto, Guid id, CancellationToken cancellationToken = default)
         {
-            var workout = await repository.GetByIdAsync(id);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
 
             if (workout == null)
             {
-                throw new Exception($"Такая тренировка не найдена.");
+                throw new Exception("Такая тренировка не найдена.");
             }
 
-            workout.Planned = dto.Planned;
-            workout.Actual = dto.Actual;
+            mapper.Map(dto, workout);
 
-            await repository.UpdateAsync(workout);
-            return new WorkoutDto
-            {
-                WorkoutId = workout.WorkoutId,
-                UserId = workout.UserId,
-                Planned = workout.Planned,
-                Actual = workout.Actual,
-                Exercises = new List<WorkoutExerciseDto>(),
-            };
+            workoutRepository.Update(workout);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return mapper.Map<WorkoutDto>(workout);
         }
-        public async Task<bool> DeleteAsync(Guid id)
+
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var workout = await repository.GetByIdAsync(id);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+
             if (workout == null)
             {
                 return false;
             }
-            await repository.DeleteAsync(id);
+
+            workoutRepository.Delete(workout);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
             return true;
         }
-
     }
 }

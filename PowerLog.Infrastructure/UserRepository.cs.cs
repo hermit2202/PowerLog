@@ -1,50 +1,34 @@
 using Microsoft.EntityFrameworkCore;
-using PowerLog.Core.Interfaces;
+using PowerLog.Core.Contracts.Data;
 using PowerLog.Core.Models;
 
-namespace PowerLog.Infrastructure
+namespace PowerLog.Infrastructure;
+
+public class UserRepository : BaseWriteRepository<User>, IUserRepository
 {
-    public class UserRepository : IRepository<User>
+    private readonly IReader reader;
+
+    public UserRepository(IWriter writer, IReader reader) : base(writer)
     {
-        private readonly PowerLogContext db;
+        this.reader = reader;
+    }
 
-        public UserRepository(PowerLogContext db)
-        {
-            this.db = db;
-        }
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await reader.Read<User>()
+            .FirstOrDefaultAsync(u => u.UserId == id, cancellationToken);
+    }
 
-        public async Task<IEnumerable<User>> GetAllAsync()
-        {
-            return await db.Users.ToListAsync();
-        }
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
+    {
+        return await reader.Read<User>()
+            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+    }
 
-        public async Task<User?> GetByIdAsync(Guid id)
-        {
-            return await db.Users.FindAsync(id);
-        }
-
-        public async Task CreateAsync(User user)
-        {
-            db.Users.Add(user);
-            await db.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(User user)
-        {
-            db.Entry(user).State = EntityState.Modified;
-            await db.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            User? user = await db.Users.FindAsync(id);
-            if (user == null)
-            {
-                throw new Exception("Ошибка: пользователь не найден");
-            }
-            db.Users.Remove(user);
-            await db.SaveChangesAsync();
-        }
-
+    public async Task<User?> GetByIdWithWorkoutsAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await reader.Read<User>()
+            .Include(u => u.Workouts)
+            .FirstOrDefaultAsync(u => u.UserId == id, cancellationToken);
     }
 }

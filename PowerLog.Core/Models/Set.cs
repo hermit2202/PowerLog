@@ -6,7 +6,7 @@ namespace PowerLog.Core.Models
     /// <summary>
     /// Модель выполненного подхода.
     /// </summary>
-    public class Set
+    public class Set : IEntity
     {
         /// <summary>
         /// Уникальный идентификатор подхода.
@@ -17,6 +17,11 @@ namespace PowerLog.Core.Models
         /// Уникальный идентификатор выполненных упражнений за тренировку.
         /// </summary>
         public Guid WorkoutExerciseId { get; set; }
+
+        /// <summary>
+        /// Номер подхода.
+        /// </summary>
+        public int SetNumber { get; set; }
 
         /// <summary>
         /// Выполненное упражнения за тренировку.

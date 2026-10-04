@@ -1,3 +1,5 @@
+using PowerLog.Core.Models;
+
 namespace PowerLog.Core.Contracts.Data;
 
 /// <summary>
@@ -6,7 +8,8 @@ namespace PowerLog.Core.Contracts.Data;
 public interface IReader
 {
     /// <summary>
-    /// Предоставляет функциональную возможность для выполнения запросов.
+    /// Предоставляет IQueryable для построения запросов.
+    /// Реализация должна по умолчанию использовать AsNoTracking() для оптимизации чтения.
     /// </summary>
     IQueryable<TEntity> Read<TEntity>() where TEntity : class, IEntity;
 }

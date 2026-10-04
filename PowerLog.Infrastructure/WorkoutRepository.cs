@@ -1,49 +1,32 @@
 using Microsoft.EntityFrameworkCore;
-using PowerLog.Core.Interfaces;
+using PowerLog.Core.Contracts.Data;
 using PowerLog.Core.Models;
 
-namespace PowerLog.Infrastructure
+namespace PowerLog.Infrastructure;
+
+public class WorkoutRepository : BaseWriteRepository<Workout>, IWorkoutRepository
 {
-    public class WorkoutRepository : IRepository<Workout>
+    private readonly IReader reader;
+
+    public WorkoutRepository(IWriter writer, IReader reader) : base(writer)
     {
-        private readonly PowerLogContext db;
+        this.reader = reader;
+    }
 
-        public WorkoutRepository(PowerLogContext db)
-        {
-            this.db = db;
-        }
+    public async Task<Workout?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await reader.Read<Workout>()
+            .Include(w => w.WorkoutExercises)
+            .ThenInclude(we => we.Sets)
+            .Include(w => w.User)
+            .FirstOrDefaultAsync(w => w.WorkoutId == id, cancellationToken);
+    }
 
-        public async Task<IEnumerable<Workout>> GetAllAsync()
-        {
-            return await db.Workouts.ToListAsync();
-        }
-
-        public async Task<Workout?> GetByIdAsync(Guid id)
-        {
-            return await db.Workouts.FindAsync(id);
-        }
-
-        public async Task CreateAsync(Workout workout)
-        {
-            db.Workouts.Add(workout);
-            await db.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(Workout workout)
-        {
-            db.Entry(workout).State = EntityState.Modified;
-            await db.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            Workout? workout = await db.Workouts.FindAsync(id);
-            if (workout == null)
-            {
-                throw new Exception("Ошибка: тренировка не найдена");
-            }
-            db.Workouts.Remove(workout);
-            await db.SaveChangesAsync();
-        }
+    public async Task<IEnumerable<Workout>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await reader.Read<Workout>()
+            .Where(w => w.UserId == userId)
+            .OrderByDescending(w => w.Planned)
+            .ToListAsync(cancellationToken);
     }
 }

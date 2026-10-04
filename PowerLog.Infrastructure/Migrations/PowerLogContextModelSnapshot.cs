@@ -54,13 +54,13 @@ namespace PowerLog.Infrastructure.Migrations
                     b.Property<Guid>("ExerciseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("RPE")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("RecordDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Reps")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rpe")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
@@ -84,10 +84,13 @@ namespace PowerLog.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("RPE")
+                    b.Property<int>("Reps")
                         .HasColumnType("int");
 
-                    b.Property<int>("Reps")
+                    b.Property<int?>("Rpe")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SetNumber")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Weight")

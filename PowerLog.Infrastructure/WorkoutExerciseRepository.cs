@@ -1,65 +1,24 @@
 using Microsoft.EntityFrameworkCore;
-using PowerLog.Core.Interfaces;
+using PowerLog.Core.Contracts.Data;
 using PowerLog.Core.Models;
 
-namespace PowerLog.Infrastructure
+namespace PowerLog.Infrastructure;
+
+public class WorkoutExerciseRepository : BaseWriteRepository<WorkoutExercise>, IWorkoutExerciseRepository
 {
-    public class WorkoutExerciseRepository : IRepository<WorkoutExercise>
+    private readonly IReader reader;
+
+    public WorkoutExerciseRepository(IWriter writer, IReader reader) : base(writer)
     {
-        private readonly PowerLogContext db;
+        this.reader = reader;
+    }
 
-        public WorkoutExerciseRepository(PowerLogContext db)
-        {
-            this.db = db;
-        }
-
-        public async Task<IEnumerable<WorkoutExercise>> GetAllAsync()
-        {
-            var workoutExercises = await db.WorkoutExercises
-                .Include(we => we.Exercise)
-                .Include(we => we.Sets)
-                .ToListAsync();
-            return workoutExercises;
-        }
-
-        public async Task<WorkoutExercise?> GetByIdAsync(Guid id)
-        {
-            var workoutExercise = await db.WorkoutExercises
-                .Include(we => we.Exercise)
-                .Include(we => we.Sets)
-                .FirstOrDefaultAsync(we => we.WorkoutExerciseId == id);
-            return workoutExercise;
-        }
-
-        public async Task CreateAsync(WorkoutExercise workoutExercise)
-        {
-            db.WorkoutExercises.Add(workoutExercise);
-            await db.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(WorkoutExercise workoutExercise)
-        {
-            db.Entry(workoutExercise).State = EntityState.Modified;
-            await db.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            var workoutExercise = await db.WorkoutExercises
-                .Include(we => we.Sets)
-                .FirstOrDefaultAsync(we => we.WorkoutExerciseId == id);
-            if (workoutExercise == null)
-            {
-                throw new Exception("Ошибка: упражнение тренировки не найдено");
-            }
-
-            if (workoutExercise.Sets != null)
-            {
-                db.Sets.RemoveRange(workoutExercise.Sets);
-            }
-
-            db.WorkoutExercises.Remove(workoutExercise);
-            await db.SaveChangesAsync();
-        }
+    public async Task<IEnumerable<WorkoutExercise>> GetByWorkoutIdAsync(Guid workoutId, CancellationToken cancellationToken)
+    {
+        return await reader.Read<WorkoutExercise>()
+            .Where(we => we.WorkoutId == workoutId)
+            .Include(we => we.Exercise)
+            .Include(we => we.Sets)
+            .ToListAsync(cancellationToken);
     }
 }

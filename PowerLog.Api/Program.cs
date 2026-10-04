@@ -2,29 +2,49 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PowerLog.Core.Contracts.Data;
 using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
 using PowerLog.Core.Services;
 using PowerLog.Infrastructure;
+using PowerLog.Infrastructure.Persistence;
+using PowerLog.Core.Services.AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<PowerLogContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IRepository<Workout>, WorkoutRepository>();
-builder.Services.AddScoped<IRepository<User>, UserRepository>();
-builder.Services.AddScoped<IRepository<Exercise>, ExerciseRepository>();
-builder.Services.AddScoped<IRepository<PersonalRecord>, PersonalRecordRepository>();
-builder.Services.AddScoped<IRepository<WorkoutExercise>, WorkoutExerciseRepository>();
-builder.Services.AddScoped<IRepository<Set>, SetRepository>();
+builder.Services.AddScoped<IReader, Reader>();
+builder.Services.AddScoped<IWriter, Writer>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
+builder.Services.AddScoped<IPersonalRecordRepository, PersonalRecordRepository>();
+builder.Services.AddScoped<IWorkoutExerciseRepository, WorkoutExerciseRepository>();
+builder.Services.AddScoped<ISetRepository, SetRepository>();
 
 builder.Services.AddScoped<IWorkoutService, WorkoutService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
+builder.Services.AddScoped<IPersonalRecordService, PersonalRecordService>();
 builder.Services.AddScoped<AuthService>();
 
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MappingProfile)));
+
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

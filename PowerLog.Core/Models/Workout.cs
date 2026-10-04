@@ -5,7 +5,7 @@ namespace PowerLog.Core.Models
     /// <summary>
     /// Модель тренировки.
     /// </summary>
-    public class Workout
+    public class Workout : IEntity
     {
         /// <summary>
         /// Уникальный идентификатор тренировки.

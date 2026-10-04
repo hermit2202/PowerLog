@@ -1,3 +1,5 @@
+using AutoMapper;
+using PowerLog.Core.Contracts.Data;
 using PowerLog.Core.DTOs.User;
 using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
@@ -6,89 +8,71 @@ namespace PowerLog.Core.Services
 {
     public class UserService : IUserService
     {
-        private readonly IRepository<User> repository;
+        private readonly IUserRepository userRepository;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IMapper mapper;
         private readonly AuthService authService;
 
-        public UserService(IRepository<User> repository, AuthService authService)
+        public UserService(
+            IUserRepository userRepository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            AuthService authService)
         {
-            this.repository = repository;
+            this.userRepository = userRepository;
+            this.unitOfWork = unitOfWork;
+            this.mapper = mapper;
             this.authService = authService;
         }
 
-        public async Task<UserDto> GetById(Guid id)
+        public async Task<UserDto> GetById(Guid id, CancellationToken cancellationToken = default)
         {
-            var user = await repository.GetByIdAsync(id);
+            var user = await userRepository.GetByIdAsync(id, cancellationToken);
+
             if (user == null)
             {
                 throw new Exception("Такой пользователь не найден.");
             }
 
-            var dto = new UserDto
+            return mapper.Map<UserDto>(user);
+        }
+
+        public async Task<LoginResponseDto> Login(LoginDto dto, CancellationToken cancellationToken = default)
+        {
+            var user = await userRepository.GetByEmailAsync(dto.Email, cancellationToken);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+            {
+                throw new Exception("Неверный email или пароль.");
+            }
+
+            var token = authService.GenerateToken(user);
+
+            return new LoginResponseDto
             {
                 UserId = user.UserId,
                 UserName = user.UserName,
                 Email = user.Email,
-            };
-
-            return dto;
-        }
-
-        public async Task<LoginResponseDto> Login(LoginDto dto)
-        {
-            var existingUser = (await repository.GetAllAsync())
-                .FirstOrDefault(u => u.Email == dto.Email);
-
-            if (existingUser == null)
-            {
-                throw new Exception("Неверный email или пароль.");
-            }
-
-            var verify = BCrypt.Net.BCrypt.Verify(dto.Password, existingUser.PasswordHash);
-
-            if (verify == false)
-            {
-                throw new Exception("Неверный email или пароль.");
-            }
-
-            var token = authService.GenerateToken(existingUser);
-
-            return new LoginResponseDto
-            {
-                UserId = existingUser.UserId,
-                UserName = existingUser.UserName,
-                Email = existingUser.Email,
-                JwtToken = token,
+                JwtToken = token
             };
         }
 
-        public async Task<UserDto> Register(RegisterDto dto)
+        public async Task<UserDto> Register(RegisterDto dto, CancellationToken cancellationToken = default)
         {
-            var existingUser = (await repository.GetAllAsync())
-                .FirstOrDefault(u => u.Email == dto.Email);
+            var existingUser = await userRepository.GetByEmailAsync(dto.Email, cancellationToken);
 
             if (existingUser != null)
             {
                 throw new Exception("Пользователь с таким email уже существует.");
             }
 
-            var newUser = new User
-            {
-                UserId = Guid.NewGuid(),
-                UserName = dto.UserName,
-                Email = dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            };
+            var newUser = mapper.Map<User>(dto);
+            newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
-            await repository.CreateAsync(newUser);
+            userRepository.Add(newUser);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var userDto = new UserDto
-            {
-                UserId = newUser.UserId,
-                UserName = dto.UserName,
-                Email = dto.Email,
-            };
-
-            return userDto;
+            return mapper.Map<UserDto>(newUser);
         }
     }
 }

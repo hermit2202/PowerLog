@@ -1,49 +1,42 @@
 using Microsoft.EntityFrameworkCore;
-using PowerLog.Core.Interfaces;
+using PowerLog.Core.Contracts.Data;
 using PowerLog.Core.Models;
 
-namespace PowerLog.Infrastructure
+namespace PowerLog.Infrastructure;
+
+public class PersonalRecordRepository : BaseWriteRepository<PersonalRecord>, IPersonalRecordRepository
 {
-    public class PersonalRecordRepository : IRepository<PersonalRecord>
+    private readonly IReader reader;
+
+    public PersonalRecordRepository(IWriter writer, IReader reader) : base(writer)
     {
-        private readonly PowerLogContext db;
+        this.reader = reader;
+    }
 
-        public PersonalRecordRepository(PowerLogContext db)
-        {
-            this.db = db;
-        }
+    public async Task<IEnumerable<PersonalRecord>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await reader.Read<PersonalRecord>()
+            .Where(pr => pr.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
 
-        public async Task<IEnumerable<PersonalRecord>> GetAllAsync()
-        {
-            return await db.PersonalRecords.ToListAsync();
-        }
+    public async Task<PersonalRecord?> GetRecordAsync(Guid userId, Guid exerciseId, CancellationToken cancellationToken)
+    {
+        return await reader.Read<PersonalRecord>()
+            .FirstOrDefaultAsync(pr => pr.UserId == userId && pr.ExerciseId == exerciseId, cancellationToken);
+    }
 
-        public async Task<PersonalRecord?> GetByIdAsync(Guid id)
-        {
-            return await db.PersonalRecords.FindAsync(id);
-        }
+    public async Task<PersonalRecord?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await reader.Read<PersonalRecord>()
+            .FirstOrDefaultAsync(pr => pr.PersonalRecordId == id, cancellationToken);
+    }
 
-        public async Task CreateAsync(PersonalRecord personalRecord)
-        {
-            db.PersonalRecords.Add(personalRecord);
-            await db.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(PersonalRecord personalRecord)
-        {
-            db.Entry(personalRecord).State = EntityState.Modified;
-            await db.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            PersonalRecord? personalRecord = await db.PersonalRecords.FindAsync(id);
-            if (personalRecord == null)
-            {
-                throw new Exception("Ошибка: рекорд не найден");
-            }
-            db.PersonalRecords.Remove(personalRecord);
-            await db.SaveChangesAsync();
-        }
+    public async Task<IEnumerable<PersonalRecord>> GetByUserIdAndExerciseIdAsync(
+        Guid userId, Guid exerciseId, CancellationToken cancellationToken)
+    {
+        return await reader.Read<PersonalRecord>()
+            .Where(pr => pr.UserId == userId && pr.ExerciseId == exerciseId)
+            .ToListAsync(cancellationToken);
     }
 }

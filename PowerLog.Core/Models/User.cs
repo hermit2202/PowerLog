@@ -5,7 +5,7 @@ namespace PowerLog.Core.Models
     /// <summary>
     /// Модель пользователя.
     /// </summary>
-    public class User
+    public class User : IEntity
     {
         /// <summary>
         /// Уникальный идентификатор пользователя.

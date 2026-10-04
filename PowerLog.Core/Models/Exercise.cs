@@ -5,7 +5,7 @@ namespace PowerLog.Core.Models
     /// <summary>
     /// Модель упражнения
     /// </summary>
-    public class Exercise
+    public class Exercise : IEntity
     {
         /// <summary>
         /// Уникальный идентификатор упражнения.
