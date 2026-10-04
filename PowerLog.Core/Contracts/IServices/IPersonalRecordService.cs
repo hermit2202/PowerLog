@@ -1,6 +1,6 @@
 ﻿using PowerLog.Core.DTOs.PersonalRecord;
 
-namespace PowerLog.Core.Interfaces
+namespace PowerLog.Core.Contracts.IServices
 {
     public interface IPersonalRecordService
     {

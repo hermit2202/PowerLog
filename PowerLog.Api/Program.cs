@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PowerLog.Core.Contracts.Data;
-using PowerLog.Core.Interfaces;
+using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.Models;
 using PowerLog.Core.Services;
 using PowerLog.Infrastructure;

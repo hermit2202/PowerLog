@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.Workout;
-using PowerLog.Core.Interfaces;
 
 namespace PowerLog.Api.Controllers
 {

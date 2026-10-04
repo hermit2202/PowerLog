@@ -1,7 +1,7 @@
 using AutoMapper;
 using PowerLog.Core.Contracts.Data;
+using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.User;
-using PowerLog.Core.Interfaces;
 using PowerLog.Core.Models;
 
 namespace PowerLog.Core.Services
