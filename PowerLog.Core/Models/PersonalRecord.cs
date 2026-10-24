@@ -1,12 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using PowerLog.Core.Contracts.Common;
 
 namespace PowerLog.Core.Models
 {
     /// <summary>
     /// Модель персональных рекордов.
     /// </summary>
-    public class PersonalRecord : IEntity
+    public class PersonalRecord : IEntity, IAuditableEntity
     {
         /// <summary>
         /// Уникальный идентификатор рекорда.
@@ -59,5 +60,13 @@ namespace PowerLog.Core.Models
         /// </summary>
         [Required]
         public DateTime RecordDate { get; set; }
+
+        /// <summary>
+        /// Поля аудита.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public Guid? UpdatedBy { get; set; }
     }
 }

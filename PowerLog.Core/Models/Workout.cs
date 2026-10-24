@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using PowerLog.Core.Contracts.Common;
 
 namespace PowerLog.Core.Models
 {
     /// <summary>
     /// Модель тренировки.
     /// </summary>
-    public class Workout : IEntity
+    public class Workout : IEntity, IAuditableEntity
     {
         /// <summary>
         /// Уникальный идентификатор тренировки.
@@ -38,5 +39,13 @@ namespace PowerLog.Core.Models
         /// Сипсок выполнненых упрежнений за тренировку.
         /// </summary>
         public List<WorkoutExercise> WorkoutExercises { get; set; } = new List<WorkoutExercise>();
+
+        /// <summary>
+        /// Поля аудита.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public Guid? UpdatedBy { get; set; }
     }
 }

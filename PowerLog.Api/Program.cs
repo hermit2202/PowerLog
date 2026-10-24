@@ -2,6 +2,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PowerLog.Api.Providers;
+using PowerLog.Core.Contracts.Common;
 using PowerLog.Core.Contracts.Data;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.Models;
@@ -18,6 +20,10 @@ builder.Services.AddDbContext<PowerLogContext>(options =>
 builder.Services.AddScoped<IReader, Reader>();
 builder.Services.AddScoped<IWriter, Writer>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+builder.Services.AddScoped<IIdentityProvider, IdentityProvider>();
 
 builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
