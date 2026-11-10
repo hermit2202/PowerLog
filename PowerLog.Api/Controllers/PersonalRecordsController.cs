@@ -13,6 +13,14 @@ namespace PowerLog.Api.Controllers
     {
         private readonly IPersonalRecordService personalRecordService;
 
+        private Guid GetCurrentUserId()
+        {
+             return Guid.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User ID not found in token.")
+            );
+        }
+
         public PersonalRecordsController(IPersonalRecordService personalRecordService)
         {
             this.personalRecordService = personalRecordService;
@@ -23,11 +31,7 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var userId = Guid.Parse(
-                    User.FindFirstValue(ClaimTypes.NameIdentifier)
-                    ?? throw new InvalidOperationException("User ID not found in token.")
-                );
-
+                var userId = GetCurrentUserId();
                 var personalRecords = await personalRecordService.GetAllPersonalRecordsAsync(userId, exerciseId, cancellationToken);
                 return Ok(personalRecords);
             }
@@ -42,7 +46,8 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var dto = await personalRecordService.GetPersonalRecordByIdAsync(id, cancellationToken);
+                var userId = GetCurrentUserId();
+                var dto = await personalRecordService.GetPersonalRecordByIdAsync(id, userId, cancellationToken);
                 return Ok(dto);
             }
             catch (Exception ex)
@@ -56,11 +61,7 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var userId = Guid.Parse(
-                    User.FindFirstValue(ClaimTypes.NameIdentifier)
-                    ?? throw new InvalidOperationException("User ID not found in token.")
-                );
-
+                var userId = GetCurrentUserId();
                 var personalRecord = await personalRecordService.CreatePersonalRecordAsync(dto, userId, cancellationToken);
                 return CreatedAtAction(nameof(GetById), new { id = personalRecord.PersonalRecordId }, personalRecord);
             }
@@ -75,19 +76,21 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                await personalRecordService.UpdatePersonalRecordAsync(dto, id, cancellationToken);
+                var userId = GetCurrentUserId();
+                await personalRecordService.UpdatePersonalRecordAsync(dto, id, userId, cancellationToken);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
             }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            var success = await personalRecordService.DeletePersonalRecordAsync(id, cancellationToken);
+            var userId = GetCurrentUserId();
+            var success = await personalRecordService.DeletePersonalRecordAsync(id, userId, cancellationToken);
             if (!success)
             {
                 return NotFound();

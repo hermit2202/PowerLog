@@ -35,11 +35,12 @@ namespace PowerLog.Core.Services
 
         public async Task<PersonalRecordDto> GetPersonalRecordByIdAsync(
             Guid id,
+            Guid userId,
             CancellationToken cancellationToken = default)
         {
             var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
 
-            if (personalRecord == null)
+            if (personalRecord == null || personalRecord.UserId != userId)
             {
                 throw new Exception("Персональный рекорд не найден.");
             }
@@ -65,11 +66,12 @@ namespace PowerLog.Core.Services
         public async Task<PersonalRecordDto> UpdatePersonalRecordAsync(
             UpdatePersonalRecordDto dto,
             Guid id,
+            Guid userId,
             CancellationToken cancellationToken = default)
         {
             var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
 
-            if (personalRecord == null)
+            if (personalRecord == null || personalRecord.UserId != userId)
             {
                 throw new Exception("Персональный рекорд не найден.");
             }
@@ -84,11 +86,12 @@ namespace PowerLog.Core.Services
 
         public async Task<bool> DeletePersonalRecordAsync(
             Guid id,
+            Guid userId,
             CancellationToken cancellationToken = default)
         {
             var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
 
-            if (personalRecord == null)
+            if (personalRecord == null || personalRecord.UserId != userId)
             {
                 return false;
             }
