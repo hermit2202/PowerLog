@@ -28,11 +28,11 @@ namespace PowerLog.Core.Services
             return mapper.Map<IEnumerable<WorkoutDto>>(workouts);
         }
 
-        public async Task<WorkoutDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<WorkoutDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
             var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
 
-            if (workout == null)
+            if (workout == null || workout.UserId != userId)
             {
                 throw new Exception("Такая тренировка не найдена.");
             }
@@ -51,11 +51,11 @@ namespace PowerLog.Core.Services
             return mapper.Map<WorkoutDto>(workout);
         }
 
-        public async Task<WorkoutDto> UpdateAsync(UpdateWorkoutDto dto, Guid id, CancellationToken cancellationToken = default)
+        public async Task<WorkoutDto> UpdateAsync(UpdateWorkoutDto dto, Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
             var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
 
-            if (workout == null)
+            if (workout == null || workout.UserId != userId)
             {
                 throw new Exception("Такая тренировка не найдена.");
             }
@@ -68,11 +68,11 @@ namespace PowerLog.Core.Services
             return mapper.Map<WorkoutDto>(workout);
         }
 
-        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
             var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
 
-            if (workout == null)
+            if (workout == null || workout.UserId != userId)
             {
                 return false;
             }
