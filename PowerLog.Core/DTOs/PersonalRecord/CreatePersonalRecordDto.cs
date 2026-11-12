@@ -5,9 +5,6 @@ namespace PowerLog.Core.DTOs.PersonalRecord
     public class CreatePersonalRecordDto
     {
         [Required]
-        public Guid UserId { get; set; }
-
-        [Required]
         public Guid ExerciseId { get; set; }
 
         [Range(0.00, 2000.00)]

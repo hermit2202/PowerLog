@@ -13,13 +13,12 @@ public class WorkoutRepository : BaseWriteRepository<Workout>, IWorkoutRepositor
         this.reader = reader;
     }
 
-    public async Task<Workout?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Workout?> GetByIdWithDetailsAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
         return await reader.Read<Workout>()
             .Include(w => w.WorkoutExercises)
             .ThenInclude(we => we.Sets)
-            .Include(w => w.User)
-            .FirstOrDefaultAsync(w => w.WorkoutId == id, cancellationToken);
+            .FirstOrDefaultAsync(w => w.WorkoutId == id && w.UserId == userId, cancellationToken);
     }
 
     public async Task<IEnumerable<Workout>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)

@@ -28,9 +28,9 @@ namespace PowerLog.Core.Services
             return mapper.Map<IEnumerable<WorkoutDto>>(workouts);
         }
 
-        public async Task<WorkoutDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<WorkoutDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
-            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, userId, cancellationToken);
 
             if (workout == null)
             {
@@ -51,9 +51,9 @@ namespace PowerLog.Core.Services
             return mapper.Map<WorkoutDto>(workout);
         }
 
-        public async Task<WorkoutDto> UpdateAsync(UpdateWorkoutDto dto, Guid id, CancellationToken cancellationToken = default)
+        public async Task<WorkoutDto> UpdateAsync(UpdateWorkoutDto dto, Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
-            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, userId, cancellationToken);
 
             if (workout == null)
             {
@@ -68,9 +68,9 @@ namespace PowerLog.Core.Services
             return mapper.Map<WorkoutDto>(workout);
         }
 
-        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
-            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, userId, cancellationToken);
 
             if (workout == null)
             {

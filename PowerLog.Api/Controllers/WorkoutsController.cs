@@ -13,6 +13,14 @@ namespace PowerLog.Api.Controllers
     {
         private readonly IWorkoutService workoutService;
 
+        private Guid GetCurrentUserId()
+        {
+            return Guid.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User ID not found in token.")
+            );
+        }
+
         public WorkoutsController(IWorkoutService workoutService)
         {
             this.workoutService = workoutService;
@@ -23,11 +31,7 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var userId = Guid.Parse(
-                    User.FindFirstValue(ClaimTypes.NameIdentifier)
-                    ?? throw new InvalidOperationException("User ID not found in token.")
-                );
-
+                var userId = GetCurrentUserId();
                 var workouts = await workoutService.GetAllAsync(userId, cancellationToken);
                 return Ok(workouts);
             }
@@ -42,7 +46,8 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var workout = await workoutService.GetByIdAsync(id, cancellationToken);
+                var userId = GetCurrentUserId();
+                var workout = await workoutService.GetByIdAsync(id, userId, cancellationToken);
                 return Ok(workout);
             }
             catch (Exception ex)
@@ -56,11 +61,7 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var userId = Guid.Parse(
-                    User.FindFirstValue(ClaimTypes.NameIdentifier)
-                    ?? throw new InvalidOperationException("User ID not found in token.")
-                );
-
+                var userId = GetCurrentUserId();
                 var workout = await workoutService.CreateAsync(dto, userId, cancellationToken);
                 return CreatedAtAction(nameof(GetById), new { id = workout.WorkoutId }, workout);
             }
@@ -75,19 +76,21 @@ namespace PowerLog.Api.Controllers
         {
             try
             {
-                var workout = await workoutService.UpdateAsync(dto, id, cancellationToken);
+                var userId = GetCurrentUserId();
+                var workout = await workoutService.UpdateAsync(dto, id, userId, cancellationToken);
                 return Ok(workout);
             }
             catch (Exception ex)
             {
-                return StatusCode(404, $"Ошибка при обновлении тренировки: {ex.Message}");
+                return NotFound(ex.Message);
             }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            var success = await workoutService.DeleteAsync(id, cancellationToken);
+            var userId = GetCurrentUserId();
+            var success = await workoutService.DeleteAsync(id, userId, cancellationToken);
             if (!success)
             {
                 return NotFound();

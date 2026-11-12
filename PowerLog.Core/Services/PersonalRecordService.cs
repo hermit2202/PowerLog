@@ -35,9 +35,10 @@ namespace PowerLog.Core.Services
 
         public async Task<PersonalRecordDto> GetPersonalRecordByIdAsync(
             Guid id,
+            Guid userId,
             CancellationToken cancellationToken = default)
         {
-            var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
+            var personalRecord = await personalRecordRepository.GetByIdAsync(id, userId, cancellationToken);
 
             if (personalRecord == null)
             {
@@ -65,9 +66,10 @@ namespace PowerLog.Core.Services
         public async Task<PersonalRecordDto> UpdatePersonalRecordAsync(
             UpdatePersonalRecordDto dto,
             Guid id,
+            Guid userId,
             CancellationToken cancellationToken = default)
         {
-            var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
+            var personalRecord = await personalRecordRepository.GetByIdAsync(id, userId, cancellationToken);
 
             if (personalRecord == null)
             {
@@ -84,9 +86,10 @@ namespace PowerLog.Core.Services
 
         public async Task<bool> DeletePersonalRecordAsync(
             Guid id,
+            Guid userId,
             CancellationToken cancellationToken = default)
         {
-            var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
+            var personalRecord = await personalRecordRepository.GetByIdAsync(id, userId, cancellationToken);
 
             if (personalRecord == null)
             {

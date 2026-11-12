@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PowerLog.Core.Contracts.IServices;
@@ -17,12 +18,16 @@ namespace PowerLog.Api.Controllers
         }
 
         [Authorize]
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetById(Guid id, CancellationToken cancellationToken)
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDto>> GetMe(CancellationToken cancellationToken)
         {
+            var userId = Guid.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User ID not found in token."));
+
             try
             {
-                var dto = await userService.GetById(id, cancellationToken);
+                var dto = await userService.GetById(userId, cancellationToken);
                 return Ok(dto);
             }
             catch (Exception ex)
@@ -37,7 +42,7 @@ namespace PowerLog.Api.Controllers
             try
             {
                 var userDto = await userService.Register(dto, cancellationToken);
-                return CreatedAtAction(nameof(GetById), new { id = userDto.UserId }, userDto);
+                return CreatedAtAction(nameof(GetMe), null, userDto);
             }
             catch (Exception ex)
             {
