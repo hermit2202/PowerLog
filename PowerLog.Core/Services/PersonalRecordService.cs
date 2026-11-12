@@ -38,9 +38,9 @@ namespace PowerLog.Core.Services
             Guid userId,
             CancellationToken cancellationToken = default)
         {
-            var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
+            var personalRecord = await personalRecordRepository.GetByIdAsync(id, userId, cancellationToken);
 
-            if (personalRecord == null || personalRecord.UserId != userId)
+            if (personalRecord == null)
             {
                 throw new Exception("Персональный рекорд не найден.");
             }
@@ -69,9 +69,9 @@ namespace PowerLog.Core.Services
             Guid userId,
             CancellationToken cancellationToken = default)
         {
-            var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
+            var personalRecord = await personalRecordRepository.GetByIdAsync(id, userId, cancellationToken);
 
-            if (personalRecord == null || personalRecord.UserId != userId)
+            if (personalRecord == null)
             {
                 throw new Exception("Персональный рекорд не найден.");
             }
@@ -89,9 +89,9 @@ namespace PowerLog.Core.Services
             Guid userId,
             CancellationToken cancellationToken = default)
         {
-            var personalRecord = await personalRecordRepository.GetByIdAsync(id, cancellationToken);
+            var personalRecord = await personalRecordRepository.GetByIdAsync(id, userId, cancellationToken);
 
-            if (personalRecord == null || personalRecord.UserId != userId)
+            if (personalRecord == null)
             {
                 return false;
             }

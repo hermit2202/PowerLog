@@ -26,10 +26,10 @@ public class PersonalRecordRepository : BaseWriteRepository<PersonalRecord>, IPe
             .FirstOrDefaultAsync(pr => pr.UserId == userId && pr.ExerciseId == exerciseId, cancellationToken);
     }
 
-    public async Task<PersonalRecord?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<PersonalRecord?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
         return await reader.Read<PersonalRecord>()
-            .FirstOrDefaultAsync(pr => pr.PersonalRecordId == id, cancellationToken);
+            .FirstOrDefaultAsync(pr => pr.PersonalRecordId == id && pr.UserId == userId, cancellationToken);
     }
 
     public async Task<IEnumerable<PersonalRecord>> GetByUserIdAndExerciseIdAsync(

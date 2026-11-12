@@ -30,9 +30,9 @@ namespace PowerLog.Core.Services
 
         public async Task<WorkoutDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
-            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, userId, cancellationToken);
 
-            if (workout == null || workout.UserId != userId)
+            if (workout == null)
             {
                 throw new Exception("Такая тренировка не найдена.");
             }
@@ -53,9 +53,9 @@ namespace PowerLog.Core.Services
 
         public async Task<WorkoutDto> UpdateAsync(UpdateWorkoutDto dto, Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
-            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, userId, cancellationToken);
 
-            if (workout == null || workout.UserId != userId)
+            if (workout == null)
             {
                 throw new Exception("Такая тренировка не найдена.");
             }
@@ -70,9 +70,9 @@ namespace PowerLog.Core.Services
 
         public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
-            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+            var workout = await workoutRepository.GetByIdWithDetailsAsync(id, userId, cancellationToken);
 
-            if (workout == null || workout.UserId != userId)
+            if (workout == null)
             {
                 return false;
             }
