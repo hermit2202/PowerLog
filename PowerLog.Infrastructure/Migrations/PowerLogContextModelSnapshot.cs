@@ -40,9 +40,34 @@ namespace PowerLog.Infrastructure.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("ExerciseId");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Exercises");
+
+                    b.HasData(
+                        new
+                        {
+                            ExerciseId = new Guid("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e01"),
+                            Name = "Приседания со штангой",
+                            Type = 0
+                        },
+                        new
+                        {
+                            ExerciseId = new Guid("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e02"),
+                            Name = "Жим лёжа",
+                            Type = 1
+                        },
+                        new
+                        {
+                            ExerciseId = new Guid("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e03"),
+                            Name = "Становая тяга",
+                            Type = 2
+                        });
                 });
 
             modelBuilder.Entity("PowerLog.Core.Models.PersonalRecord", b =>
@@ -198,6 +223,16 @@ namespace PowerLog.Infrastructure.Migrations
                     b.HasIndex("WorkoutId");
 
                     b.ToTable("WorkoutExercises");
+                });
+
+            modelBuilder.Entity("PowerLog.Core.Models.Exercise", b =>
+                {
+                    b.HasOne("PowerLog.Core.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PowerLog.Core.Models.PersonalRecord", b =>

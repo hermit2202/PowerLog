@@ -27,7 +27,27 @@ namespace PowerLog.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Exercise>()
+                .HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Exercise>()
+                .HasData(
+                    new Exercise
+                    {
+                        ExerciseId = Guid.Parse("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e01"), Name = "Приседания со штангой", Type = ExerciseType.Squat
+                    },
+                    new Exercise
+                    {
+                        ExerciseId = Guid.Parse("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e02"), Name = "Жим лёжа", Type = ExerciseType.BenchPress
+                    },
+                    new Exercise
+                    {
+                        ExerciseId = Guid.Parse("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e03"), Name = "Становая тяга", Type = ExerciseType.DeadLift
+                    }
+                );
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

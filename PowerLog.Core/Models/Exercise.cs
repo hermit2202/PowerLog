@@ -13,6 +13,17 @@ namespace PowerLog.Core.Models
         public Guid ExerciseId { get; set; }
 
         /// <summary>
+        /// Уникальный идентификатор владельца.
+        /// Null означает системное упражнение, общее для всех.
+        /// </summary>
+        public Guid? UserId { get; set; }
+
+        /// <summary>
+        /// Пользователь.
+        /// </summary>
+        public User? User { get; set; }
+
+        /// <summary>
         /// Название упражнения.
         /// </summary>
         [Required]
