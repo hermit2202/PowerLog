@@ -1,5 +1,5 @@
 using AutoMapper;
-using PowerLog.Core.Contracts.Data;
+using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.Workout;
 using PowerLog.Core.Models;

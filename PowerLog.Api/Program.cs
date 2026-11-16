@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PowerLog.Api.Providers;
 using PowerLog.Core.Contracts.Common;
-using PowerLog.Core.Contracts.Data;
+using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.Models;
 using PowerLog.Core.Services;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PowerLog.Core.Models;
-using PowerLog.Core.Contracts.Data;
+using PowerLog.Core.Contracts.IData;
 
 namespace PowerLog.Infrastructure.Persistence;
 

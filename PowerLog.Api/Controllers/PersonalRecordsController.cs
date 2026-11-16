@@ -13,14 +13,6 @@ namespace PowerLog.Api.Controllers
     {
         private readonly IPersonalRecordService personalRecordService;
 
-        private Guid GetCurrentUserId()
-        {
-             return Guid.Parse(
-                User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? throw new InvalidOperationException("User ID not found in token.")
-            );
-        }
-
         public PersonalRecordsController(IPersonalRecordService personalRecordService)
         {
             this.personalRecordService = personalRecordService;
@@ -96,6 +88,14 @@ namespace PowerLog.Api.Controllers
                 return NotFound();
             }
             return NoContent();
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            return Guid.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User ID not found in token.")
+            );
         }
     }
 }

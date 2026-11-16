@@ -1,4 +1,4 @@
-namespace PowerLog.Core.Contracts.Data;
+namespace PowerLog.Core.Contracts.IData;
 
 /// <summary>
 /// Определяет интерфейс для unit of work.
