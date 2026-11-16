@@ -28,9 +28,15 @@ namespace PowerLog.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -53,18 +59,21 @@ namespace PowerLog.Infrastructure.Migrations
                         new
                         {
                             ExerciseId = new Guid("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e01"),
+                            IsDeleted = false,
                             Name = "Приседания со штангой",
                             Type = 0
                         },
                         new
                         {
                             ExerciseId = new Guid("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e02"),
+                            IsDeleted = false,
                             Name = "Жим лёжа",
                             Type = 1
                         },
                         new
                         {
                             ExerciseId = new Guid("c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e03"),
+                            IsDeleted = false,
                             Name = "Становая тяга",
                             Type = 2
                         });
@@ -240,7 +249,7 @@ namespace PowerLog.Infrastructure.Migrations
                     b.HasOne("PowerLog.Core.Models.Exercise", "Exercise")
                         .WithMany()
                         .HasForeignKey("ExerciseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PowerLog.Core.Models.User", "User")
@@ -281,7 +290,7 @@ namespace PowerLog.Infrastructure.Migrations
                     b.HasOne("PowerLog.Core.Models.Exercise", "Exercise")
                         .WithMany()
                         .HasForeignKey("ExerciseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PowerLog.Core.Models.Workout", "Workout")

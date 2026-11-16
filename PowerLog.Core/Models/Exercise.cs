@@ -40,6 +40,16 @@ namespace PowerLog.Core.Models
         /// </summary>
         [StringLength(500)]
         public string? Description { get; set; }
+
+        /// <summary>
+        /// Флаг удаления.
+        /// </summary>
+        public bool IsDeleted { get; set; }
+
+        /// <summary>
+        /// Время удаления.
+        /// </summary>
+        public DateTime? DeletedAt { get; set; }
     }
 
     /// <summary>
