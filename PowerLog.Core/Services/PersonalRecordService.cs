@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PowerLog.Core.Contracts.Common;
 using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.PersonalRecord;
@@ -11,15 +12,21 @@ namespace PowerLog.Core.Services
         private readonly IPersonalRecordRepository personalRecordRepository;
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
+        private readonly IExerciseRepository exerciseRepository;
+        private readonly IDateTimeProvider dateTimeProvider;
 
         public PersonalRecordService(
             IPersonalRecordRepository personalRecordRepository,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IExerciseRepository exerciseRepository,
+            IDateTimeProvider dateTimeProvider)
         {
             this.personalRecordRepository = personalRecordRepository;
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
+            this.exerciseRepository = exerciseRepository;
+            this.dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<IEnumerable<PersonalRecordDto>> GetAllPersonalRecordsAsync(
@@ -42,7 +49,7 @@ namespace PowerLog.Core.Services
 
             if (personalRecord == null)
             {
-                throw new Exception("Персональный рекорд не найден.");
+                throw new KeyNotFoundException("Персональный рекорд не найден");
             }
 
             return mapper.Map<PersonalRecordDto>(personalRecord);
@@ -53,9 +60,15 @@ namespace PowerLog.Core.Services
             Guid userId,
             CancellationToken cancellationToken = default)
         {
+            var exercise = await exerciseRepository.GetAvailableByIdAsync(dto.ExerciseId, userId, cancellationToken);
+            if (exercise == null)
+            {
+                throw new KeyNotFoundException("Нет доступного упражнения с таким Id");
+            }
+
             var personalRecord = mapper.Map<PersonalRecord>(dto);
             personalRecord.UserId = userId;
-            personalRecord.RecordDate = DateTime.UtcNow;
+            personalRecord.RecordDate = dateTimeProvider.UtcNow;
 
             personalRecordRepository.Add(personalRecord);
             await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -73,7 +86,7 @@ namespace PowerLog.Core.Services
 
             if (personalRecord == null)
             {
-                throw new Exception("Персональный рекорд не найден.");
+                throw new KeyNotFoundException("Персональный рекорд не найден.");
             }
 
             mapper.Map(dto, personalRecord);

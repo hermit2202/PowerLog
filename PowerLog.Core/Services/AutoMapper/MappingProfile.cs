@@ -55,6 +55,7 @@ public class MappingProfile : Profile
         CreateMap<UpdatePersonalRecordDto, PersonalRecord>()
             .ForMember(dest => dest.PersonalRecordId, opt => opt.Ignore())
             .ForMember(dest => dest.UserId, opt => opt.Ignore())
-            .ForMember(dest => dest.RecordDate, opt => opt.Ignore());
+            .ForMember(dest => dest.RecordDate, opt => opt.Ignore())
+            .ForMember(dest => dest.ExerciseId, opt => opt.Ignore());
     }
 }

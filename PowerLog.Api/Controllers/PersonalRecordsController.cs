@@ -21,28 +21,24 @@ namespace PowerLog.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PersonalRecordDto>>> GetAll(Guid exerciseId, CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var personalRecords = await personalRecordService.GetAllPersonalRecordsAsync(userId, exerciseId, cancellationToken);
-                return Ok(personalRecords);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Ошибка при получении персональных рекордов: {ex.Message}");
-            }
+            var userId = GetCurrentUserId();
+
+            var personalRecords = await personalRecordService.GetAllPersonalRecordsAsync(userId, exerciseId, cancellationToken);
+            return Ok(personalRecords);
         }
+
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PersonalRecordDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
+            var userId = GetCurrentUserId();
             try
             {
-                var userId = GetCurrentUserId();
                 var dto = await personalRecordService.GetPersonalRecordByIdAsync(id, userId, cancellationToken);
                 return Ok(dto);
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -51,28 +47,28 @@ namespace PowerLog.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<PersonalRecordDto>> Create(CreatePersonalRecordDto dto, CancellationToken cancellationToken)
         {
+            var userId = GetCurrentUserId();
             try
             {
-                var userId = GetCurrentUserId();
                 var personalRecord = await personalRecordService.CreatePersonalRecordAsync(dto, userId, cancellationToken);
                 return CreatedAtAction(nameof(GetById), new { id = personalRecord.PersonalRecordId }, personalRecord);
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
-                return StatusCode(400, $"Ошибка при создании персонального рекорда: {ex.Message}");
+                return NotFound($"Ошибка при создании персонального рекорда: {ex.Message}");
             }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdatePersonalRecordDto dto, CancellationToken cancellationToken)
         {
+            var userId = GetCurrentUserId();
             try
             {
-                var userId = GetCurrentUserId();
                 await personalRecordService.UpdatePersonalRecordAsync(dto, id, userId, cancellationToken);
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }

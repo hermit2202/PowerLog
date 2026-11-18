@@ -103,3 +103,40 @@ Content-Type: application/json
 ### 15. Удалить неиспользованное — ожидаем 204 (физическое удаление)
 DELETE {{host}}/api/exercises/{{freshId}}
 Authorization: Bearer {{token1}}
+
+### 16. Рекорд на системное упражнение — ожидаем 201
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"exerciseId":"c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e01","weight":100,"reps":5,"rpe":8}
+
+### 17. Пользователь 1 создаёт приватное упражнение — ожидаем 201
+POST {{host}}/api/exercises
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"name":"Тяга гантели в наклоне","type":3}
+
+> {% client.global.set("privateId", response.body.exerciseId); %}
+
+### 18. Пользователь 2: рекорд на чужое приватное — ожидаем 404
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token2}}
+Content-Type: application/json
+
+{"exerciseId":"{{privateId}}","weight":30,"reps":10,"rpe":7}
+
+### 19. Рекорд на мягко удалённое упражнение (из шага 11) — ожидаем 404
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"exerciseId":"{{myId}}","weight":40,"reps":10,"rpe":8}
+
+### 20. Рекорд на несуществующее упражнение — ожидаем 404
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"exerciseId":"00000000-0000-0000-0000-000000000099","weight":40,"reps":10,"rpe":8}
