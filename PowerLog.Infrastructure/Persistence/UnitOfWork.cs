@@ -1,4 +1,4 @@
-﻿using PowerLog.Core.Contracts.Data; // Путь к твоему IUnitOfWork
+﻿using PowerLog.Core.Contracts.IData; // Путь к твоему IUnitOfWork
 
 namespace PowerLog.Infrastructure.Persistence;
 

@@ -13,14 +13,6 @@ namespace PowerLog.Api.Controllers
     {
         private readonly IWorkoutService workoutService;
 
-        private Guid GetCurrentUserId()
-        {
-            return Guid.Parse(
-                User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? throw new InvalidOperationException("User ID not found in token.")
-            );
-        }
-
         public WorkoutsController(IWorkoutService workoutService)
         {
             this.workoutService = workoutService;
@@ -96,6 +88,14 @@ namespace PowerLog.Api.Controllers
                 return NotFound();
             }
             return NoContent();
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            return Guid.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User ID not found in token.")
+            );
         }
     }
 }

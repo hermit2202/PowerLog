@@ -1,6 +1,6 @@
 using PowerLog.Core.Models;
 
-namespace PowerLog.Core.Contracts.Data;
+namespace PowerLog.Core.Contracts.IData;
 
 /// <summary>
 /// Интерфейс для получения данных из контекста.

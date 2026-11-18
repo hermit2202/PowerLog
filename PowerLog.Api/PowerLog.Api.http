@@ -1,6 +1,142 @@
-@PowerLog.Api_HostAddress = http://localhost:5152
+@host = http://localhost:5152
 
-GET {{PowerLog.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Регистрация второго пользователя (если уже есть — будет 409, это нормально)
+POST {{host}}/api/users/register
+Content-Type: application/json
 
-###
+{"userName":"athlete2","email":"athlete2@example.com","password":"password123"}
+
+### Вход пользователем 1 (тестовый из seed)
+POST {{host}}/api/users/login
+Content-Type: application/json
+
+{"email":"test@example.com","password":"password123"}
+
+> {% client.global.set("token1", response.body.jwtToken); %}
+
+### Вход пользователем 2
+POST {{host}}/api/users/login
+Content-Type: application/json
+
+{"email":"athlete2@example.com","password":"password123"}
+
+> {% client.global.set("token2", response.body.jwtToken); %}
+
+### 1. Список — ожидаем 200 и три системных упражнения
+GET {{host}}/api/exercises
+Authorization: Bearer {{token1}}
+
+### 2. Создать своё — ожидаем 201
+POST {{host}}/api/exercises
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"name":"Жим гантелей","type":3,"description":"Наклонная скамья"}
+
+> {% client.global.set("myId", response.body.exerciseId); %}
+
+### 3. Дубль названия в другом регистре и с пробелами — ожидаем 409
+POST {{host}}/api/exercises
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"name":"  жим ГАНТЕЛЕЙ ","type":3}
+
+### 4. Изменить своё, название то же — ожидаем 200 (проверка excludeId)
+PUT {{host}}/api/exercises/{{myId}}
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"name":"Жим гантелей","type":3,"description":"Горизонтальная скамья"}
+
+### 5. Изменить системное «Жим лёжа» — ожидаем 403
+PUT {{host}}/api/exercises/c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e02
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"name":"Жим лёжа","type":1}
+
+### 6. Удалить системное — ожидаем 403
+DELETE {{host}}/api/exercises/c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e02
+Authorization: Bearer {{token1}}
+
+### 7. Пользователь 2: список — ожидаем только три системных
+GET {{host}}/api/exercises
+Authorization: Bearer {{token2}}
+
+### 8. Пользователь 2: чужое по id — ожидаем 404
+GET {{host}}/api/exercises/{{myId}}
+Authorization: Bearer {{token2}}
+
+### 9. Пользователь 2: удалить чужое — ожидаем 404
+DELETE {{host}}/api/exercises/{{myId}}
+Authorization: Bearer {{token2}}
+
+### 10. Создать рекорд на своё упражнение — ожидаем 201
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"exerciseId":"{{myId}}","weight":40,"reps":10,"rpe":8}
+
+### 11. Удалить использованное упражнение — ожидаем 204 (мягкое удаление)
+DELETE {{host}}/api/exercises/{{myId}}
+Authorization: Bearer {{token1}}
+
+### 12. Упражнение пропало — ожидаем 404
+GET {{host}}/api/exercises/{{myId}}
+Authorization: Bearer {{token1}}
+
+### 13. Рекорд сохранился — ожидаем 200 и один рекорд
+GET {{host}}/api/personalrecords?exerciseId={{myId}}
+Authorization: Bearer {{token1}}
+
+### 14. То же название снова свободно — ожидаем 201
+POST {{host}}/api/exercises
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"name":"Жим гантелей","type":3}
+
+> {% client.global.set("freshId", response.body.exerciseId); %}
+
+### 15. Удалить неиспользованное — ожидаем 204 (физическое удаление)
+DELETE {{host}}/api/exercises/{{freshId}}
+Authorization: Bearer {{token1}}
+
+### 16. Рекорд на системное упражнение — ожидаем 201
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"exerciseId":"c1a7e5d2-4b3f-4e8a-9d61-0f2b7a8c1e01","weight":100,"reps":5,"rpe":8}
+
+### 17. Пользователь 1 создаёт приватное упражнение — ожидаем 201
+POST {{host}}/api/exercises
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"name":"Тяга гантели в наклоне","type":3}
+
+> {% client.global.set("privateId", response.body.exerciseId); %}
+
+### 18. Пользователь 2: рекорд на чужое приватное — ожидаем 404
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token2}}
+Content-Type: application/json
+
+{"exerciseId":"{{privateId}}","weight":30,"reps":10,"rpe":7}
+
+### 19. Рекорд на мягко удалённое упражнение (из шага 11) — ожидаем 404
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"exerciseId":"{{myId}}","weight":40,"reps":10,"rpe":8}
+
+### 20. Рекорд на несуществующее упражнение — ожидаем 404
+POST {{host}}/api/personalrecords
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"exerciseId":"00000000-0000-0000-0000-000000000099","weight":40,"reps":10,"rpe":8}

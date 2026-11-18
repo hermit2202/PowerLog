@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PowerLog.Core.Contracts.Data;
+using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Models;
 
 namespace PowerLog.Infrastructure;

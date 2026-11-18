@@ -34,9 +34,18 @@ public class MappingProfile : Profile
 
         CreateMap<Exercise, ExerciseDto>();
         CreateMap<CreateExerciseDto, Exercise>()
-            .ForMember(dest => dest.ExerciseId, opt => opt.Ignore());
+            .ForMember(dest => dest.ExerciseId, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+
         CreateMap<UpdateExerciseDto, Exercise>()
-            .ForMember(dest => dest.ExerciseId, opt => opt.Ignore());
+            .ForMember(dest => dest.ExerciseId, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
 
         CreateMap<PersonalRecord, PersonalRecordDto>();
         CreateMap<CreatePersonalRecordDto, PersonalRecord>()
@@ -46,6 +55,7 @@ public class MappingProfile : Profile
         CreateMap<UpdatePersonalRecordDto, PersonalRecord>()
             .ForMember(dest => dest.PersonalRecordId, opt => opt.Ignore())
             .ForMember(dest => dest.UserId, opt => opt.Ignore())
-            .ForMember(dest => dest.RecordDate, opt => opt.Ignore());
+            .ForMember(dest => dest.RecordDate, opt => opt.Ignore())
+            .ForMember(dest => dest.ExerciseId, opt => opt.Ignore());
     }
 }

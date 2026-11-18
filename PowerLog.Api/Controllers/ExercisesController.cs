@@ -1,8 +1,8 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.Exercise;
-using PowerLog.Core.Models;
 
 namespace PowerLog.Api.Controllers
 {
@@ -21,26 +21,21 @@ namespace PowerLog.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExerciseDto>>> GetAll(CancellationToken cancellationToken)
         {
-            try
-            {
-                var dtos = await exerciseService.GetAllExerciseAsync(cancellationToken);
-                return Ok(dtos);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Ошибка при получении упражнений: {ex.Message}");
-            }
+            var userId = GetCurrentUserId();
+            var dtos = await exerciseService.GetAllAsync(userId, cancellationToken);
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ExerciseDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
+            var userId = GetCurrentUserId();
             try
             {
-                var dto = await exerciseService.GetExerciseByIdAsync(id, cancellationToken);
+                var dto = await exerciseService.GetByIdAsync(id, userId, cancellationToken);
                 return Ok(dto);
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -49,40 +44,51 @@ namespace PowerLog.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<ExerciseDto>> Create(CreateExerciseDto dto, CancellationToken cancellationToken)
         {
+            var userId = GetCurrentUserId();
             try
             {
-                var exercise = await exerciseService.CreateExerciseAsync(dto, cancellationToken);
+                var exercise = await exerciseService.CreateAsync(dto, userId, cancellationToken);
                 return CreatedAtAction(nameof(GetById), new { id = exercise.ExerciseId }, exercise);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                return StatusCode(400, $"Ошибка при создании упражнения: {ex.Message}");
+                return Conflict(ex.Message);
             }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdateExerciseDto dto, CancellationToken cancellationToken)
         {
+            var userId = GetCurrentUserId();
             try
             {
-                var exercise = await exerciseService.UpdateExerciseAsync(dto, id, cancellationToken);
+                var exercise = await exerciseService.UpdateAsync(id, dto, userId, cancellationToken);
                 return Ok(exercise);
             }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            catch (InvalidOperationException ex) { return Conflict(ex.Message); }
+            catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+            catch (UnauthorizedAccessException ex) { return StatusCode(403, ex.Message); }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            var success = await exerciseService.DeleteExerciseAsync(id, cancellationToken);
-            if (!success)
+            var userId = GetCurrentUserId();
+            try
             {
-                return NotFound();
+                await exerciseService.DeleteAsync(id, userId, cancellationToken);
+                return NoContent();
             }
-            return NoContent();
+            catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+            catch (UnauthorizedAccessException ex) { return StatusCode(403, ex.Message); }
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            return Guid.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User ID not found in token.")
+            );
         }
     }
 }
