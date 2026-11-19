@@ -2,6 +2,7 @@ using AutoMapper;
 using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.Workout;
+using PowerLog.Core.Extensions;
 using PowerLog.Core.Models;
 
 namespace PowerLog.Core.Services
@@ -44,6 +45,8 @@ namespace PowerLog.Core.Services
         {
             var workout = mapper.Map<Workout>(dto);
             workout.UserId = userId;
+            workout.Planned = workout.Planned.ToUtc();
+            workout.Actual = workout.Actual?.ToUtc();
 
             workoutRepository.Add(workout);
             await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -61,6 +64,8 @@ namespace PowerLog.Core.Services
             }
 
             mapper.Map(dto, workout);
+            workout.Planned = workout.Planned.ToUtc();
+            workout.Actual = workout.Actual?.ToUtc();
 
             workoutRepository.Update(workout);
             await unitOfWork.SaveChangesAsync(cancellationToken);
