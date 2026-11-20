@@ -140,3 +140,17 @@ Authorization: Bearer {{token1}}
 Content-Type: application/json
 
 {"exerciseId":"00000000-0000-0000-0000-000000000099","weight":40,"reps":10,"rpe":8}
+
+### 21. Создать тренировку (дата без часового пояса) — посмотрим, что будет
+POST {{host}}/api/workouts
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"planned":"2026-11-20T18:00:00"}
+
+### 22. Тренировка со смещением +03:00 — ожидаем 201 и planned = 15:00Z
+POST {{host}}/api/workouts
+Authorization: Bearer {{token1}}
+Content-Type: application/json
+
+{"planned":"2026-11-20T18:00:00+03:00"}

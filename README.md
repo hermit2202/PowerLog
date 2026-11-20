@@ -10,16 +10,19 @@ REST API для дневника тренировок по пауэрлифти�
 | Тема | Как реализовано |
 |---|---|
 | Многослойная архитектура | `Api` → `Core` ← `Infrastructure`, зависимости направлены внутрь, бизнес-логика не знает про EF Core |
-| Работа с БД | EF Core 10 (Code First), SQL Server, миграции, аудит-поля (`CreatedAt/By`, `UpdatedAt/By`) заполняются автоматически в `SaveChangesAsync` |
+| Работа с БД | EF Core 10 (Code First), PostgreSQL в Docker Compose, миграции, имена таблиц и колонок в snake_case, аудит-поля (`CreatedAt/By`, `UpdatedAt/By`) заполняются автоматически в `SaveChangesAsync` |
+| Изоляция данных пользователей | Каждый пользователь видит системные упражнения и только свои; чужие данные недоступны (404), системные упражнения защищены от изменения (403) |
+| Сохранение истории | Гибридное удаление упражнений: неиспользованное удаляется физически, использованное в тренировках или рекордах — мягко (`IsDeleted`), история не теряется; связи с упражнениями защищены `Restrict` |
 | Паттерны доступа к данным | Repository + Unit of Work; чтение (`IReader`, `AsNoTracking`) отделено от записи (`IWriter`) |
 | Аутентификация | JWT Bearer, пароли хешируются BCrypt |
-| Тестируемость | Зависимости от времени и текущего пользователя вынесены в `IDateTimeProvider` и `IIdentityProvider` |
+| Тестируемость | Зависимости от времени и текущего пользователя вынесены в `IDateTimeProvider` и `IIdentityProvider`; все даты хранятся в UTC |
 | Контракты API | DTO отделены от доменных моделей, маппинг через AutoMapper, валидация через Data Annotations, документация в Swagger |
 
 ## Стек
 
 - .NET 10, ASP.NET Core Web API (контроллеры)
-- Entity Framework Core 10 + SQL Server
+- Entity Framework Core 10 + PostgreSQL 17 (Npgsql, EFCore.NamingConventions)
+- Docker Compose для локальной базы данных
 - JWT Bearer (`Microsoft.AspNetCore.Authentication.JwtBearer`), BCrypt.Net-Next
 - AutoMapper, Swashbuckle (Swagger UI)
 
@@ -39,28 +42,29 @@ PowerLog.Infrastructure  DbContext, репозитории, Reader/Writer/UnitOf
 erDiagram
     User ||--o{ Workout : "проводит"
     User ||--o{ PersonalRecord : "устанавливает"
+    User |o--o{ Exercise : "создаёт свои"
     Exercise ||--o{ PersonalRecord : "относится к"
     Workout ||--o{ WorkoutExercise : "включает"
     Exercise ||--o{ WorkoutExercise : "выполняется как"
     WorkoutExercise ||--o{ Set : "состоит из"
 ```
 
+Упражнение без владельца (`UserId = null`) — системное, общее для всех: приседания, жим лёжа, становая тяга.
 Тип упражнения (`ExerciseType`): `Squat`, `BenchPress`, `DeadLift`, `Accessory`.
 
 ## Быстрый старт
 
-**Требования:** .NET 10 SDK, SQL Server (LocalDB на Windows или контейнер), `dotnet-ef`.
+**Требования:** .NET 10 SDK, Docker.
 
 ```bash
 git clone https://github.com/hermit2202/PowerLog.git
 cd PowerLog
 
-# 1. (опционально) своя строка подключения и JWT-ключ (не короче 32 символов)
-export ConnectionStrings__DefaultConnection="Server=localhost,1433;Database=PowerLogDb;User Id=sa;Password=<пароль>;TrustServerCertificate=True"
-export JwtSettings__SecretKey="<случайная строка не короче 32 символов>"
+# 1. поднять PostgreSQL в контейнере
+docker compose up -d
 
-# 2. создать БД и применить миграции (нужно до первого запуска)
-dotnet tool install --global dotnet-ef
+# 2. восстановить dotnet-ef (версия закреплена в dotnet-tools.json) и применить миграции
+dotnet tool restore
 dotnet ef database update --project PowerLog.Infrastructure --startup-project PowerLog.Api
 
 # 3. запустить API
@@ -69,13 +73,15 @@ dotnet run --project PowerLog.Api
 
 Swagger UI (в режиме Development): http://localhost:5152/swagger
 
-SQL Server в контейнере, если нет LocalDB:
+Строка подключения для локальной разработки лежит в `appsettings.Development.json` и совпадает с настройками из `docker-compose.yml`.
+При первом запуске создаётся тестовый пользователь `test@example.com` / `password123`.
+
+Для другого окружения строку подключения и JWT-ключ (не короче 32 символов) можно передать через переменные окружения:
 
 ```bash
-docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=<пароль>" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+export ConnectionStrings__DefaultConnection="Host=<хост>;Port=5432;Database=powerlog;Username=<пользователь>;Password=<пароль>"
+export JwtSettings__SecretKey="<случайная строка не короче 32 символов>"
 ```
-
-Без переменных окружения приложение использует значения из `appsettings.json` (LocalDB и ключ-заглушка только для локальной разработки).
 
 ### Пример использования
 
@@ -90,11 +96,13 @@ curl -X POST http://localhost:5152/api/users/login \
   -H "Content-Type: application/json" \
   -d '{"email":"athlete@example.com","password":"strongpass1"}'
 
-# создание упражнения (type: 0 Squat, 1 BenchPress, 2 DeadLift, 3 Accessory)
+# создание своего упражнения (type: 0 Squat, 1 BenchPress, 2 DeadLift, 3 Accessory)
 curl -X POST http://localhost:5152/api/exercises \
   -H "Authorization: Bearer <jwtToken>" -H "Content-Type: application/json" \
-  -d '{"name":"Приседания со штангой","type":0}'
+  -d '{"name":"Жим гантелей","type":3}'
 ```
+
+Полный сценарий проверки API (изоляция пользователей, коды 403/404/409, мягкое удаление) — в файле `PowerLog.Api/PowerLog.Api.http`, запускается из Rider или VS Code.
 
 ## API
 
@@ -102,7 +110,7 @@ curl -X POST http://localhost:5152/api/exercises \
 
 | Ресурс | Методы |
 |---|---|
-| `/api/users` | `POST /register`, `POST /login`, `GET /{id}` |
+| `/api/users` | `POST /register`, `POST /login`, `GET /me` |
 | `/api/exercises` | `GET`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}` |
 | `/api/workouts` | `GET`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}` |
 | `/api/personalrecords` | `GET ?exerciseId=`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}` |
@@ -112,22 +120,23 @@ curl -X POST http://localhost:5152/api/exercises \
 **Реализовано**
 - Регистрация, вход, JWT-аутентификация
 - CRUD для упражнений, тренировок и личных рекордов
-- Миграции БД, автоматический аудит изменений
+- Системные и пользовательские упражнения, проверка владельца на всех эндпоинтах
+- Гибридное (мягкое) удаление упражнений с сохранением истории
+- PostgreSQL в Docker Compose, миграции БД, автоматический аудит изменений
 
 **В работе**
+- Единая обработка ошибок (`ProblemDetails`) и валидация
 - API для упражнений внутри тренировки и подходов (сущности и репозитории готовы, сервисов и эндпоинтов пока нет)
-- Проверка владельца данных на всех эндпоинтах
-- Единая обработка ошибок и валидация
 
 **Пока не реализовано**
-- Тесты, Docker-образ, CI
+- Тесты, Docker-образ API, CI
 - Расчёт статистики (тоннаж, прогресс)
 
 ## Планы
 
-1. Подходы и упражнения в тренировке, статистика: тоннаж, оценка 1ПМ, прогресс по неделям
-2. Тесты (xUnit, интеграционные на `WebApplicationFactory`), Docker Compose, GitHub Actions
-3. Роли «спортсмен / тренер»: тренер назначает тренировки и видит данные подопечного
+1. Подходы и упражнения в тренировке, статистика: тоннаж за тренировку и за неделю, оценка 1ПМ
+2. Тесты (xUnit, интеграционные на `WebApplicationFactory`), Docker-образ API, GitHub Actions
+3. Роли «спортсмен / тренер»: спортсмен даёт тренеру временный ключ доступа, тренер видит тренировки и отправляет план
 4. Дневник питания
 5. Клиент: Telegram-бот / Mini App
 

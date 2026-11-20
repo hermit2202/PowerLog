@@ -15,7 +15,8 @@ using PowerLog.Core.Services.AutoMapper;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<PowerLogContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseSnakeCaseNamingConvention());
 
 builder.Services.AddScoped<IReader, Reader>();
 builder.Services.AddScoped<IWriter, Writer>();
