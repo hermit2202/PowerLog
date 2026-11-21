@@ -27,51 +27,31 @@ namespace PowerLog.Api.Controllers
             return Ok(personalRecords);
         }
 
-
-
         [HttpGet("{id}")]
         public async Task<ActionResult<PersonalRecordDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            try
-            {
-                var dto = await personalRecordService.GetPersonalRecordByIdAsync(id, userId, cancellationToken);
-                return Ok(dto);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+
+            var dto = await personalRecordService.GetPersonalRecordByIdAsync(id, userId, cancellationToken);
+            return Ok(dto);
         }
 
         [HttpPost]
         public async Task<ActionResult<PersonalRecordDto>> Create(CreatePersonalRecordDto dto, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            try
-            {
-                var personalRecord = await personalRecordService.CreatePersonalRecordAsync(dto, userId, cancellationToken);
-                return CreatedAtAction(nameof(GetById), new { id = personalRecord.PersonalRecordId }, personalRecord);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound($"Ошибка при создании персонального рекорда: {ex.Message}");
-            }
+
+            var personalRecord = await personalRecordService.CreatePersonalRecordAsync(dto, userId, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = personalRecord.PersonalRecordId }, personalRecord);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdatePersonalRecordDto dto, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            try
-            {
-                await personalRecordService.UpdatePersonalRecordAsync(dto, id, userId, cancellationToken);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+
+            await personalRecordService.UpdatePersonalRecordAsync(dto, id, userId, cancellationToken);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]

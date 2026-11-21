@@ -25,43 +25,22 @@ namespace PowerLog.Api.Controllers
                 User.FindFirstValue(ClaimTypes.NameIdentifier)
                 ?? throw new InvalidOperationException("User ID not found in token."));
 
-            try
-            {
-                var dto = await userService.GetById(userId, cancellationToken);
-                return Ok(dto);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var dto = await userService.GetById(userId, cancellationToken);
+            return Ok(dto);
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto dto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var userDto = await userService.Register(dto, cancellationToken);
-                return CreatedAtAction(nameof(GetMe), null, userDto);
-            }
-            catch (Exception ex)
-            {
-                return Conflict(ex.Message);
-            }
+            var userDto = await userService.Register(dto, cancellationToken);
+            return CreatedAtAction(nameof(GetMe), null, userDto);
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponseDto>> Login(LoginDto dto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var response = await userService.Login(dto, cancellationToken);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return Unauthorized(ex.Message);
-            }
+            var response = await userService.Login(dto, cancellationToken);
+            return Ok(response);
         }
     }
 }
