@@ -21,61 +21,34 @@ namespace PowerLog.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<WorkoutDto>>> GetAll(CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var workouts = await workoutService.GetAllAsync(userId, cancellationToken);
-                return Ok(workouts);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Ошибка при получении тренировок: {ex.Message}");
-            }
+            var userId = GetCurrentUserId();
+            var workouts = await workoutService.GetAllAsync(userId, cancellationToken);
+            return Ok(workouts);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<WorkoutDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var workout = await workoutService.GetByIdAsync(id, userId, cancellationToken);
-                return Ok(workout);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var userId = GetCurrentUserId();
+            var workout = await workoutService.GetByIdAsync(id, userId, cancellationToken);
+            return Ok(workout);
+
         }
 
         [HttpPost]
         public async Task<ActionResult<WorkoutDto>> Create(CreateWorkoutDto dto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var workout = await workoutService.CreateAsync(dto, userId, cancellationToken);
-                return CreatedAtAction(nameof(GetById), new { id = workout.WorkoutId }, workout);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(400, $"Ошибка при создании тренировки: {ex.Message}");
-            }
+            var userId = GetCurrentUserId();
+            var workout = await workoutService.CreateAsync(dto, userId, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = workout.WorkoutId }, workout);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdateWorkoutDto dto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetCurrentUserId();
-                var workout = await workoutService.UpdateAsync(dto, id, userId, cancellationToken);
-                return Ok(workout);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var userId = GetCurrentUserId();
+            var workout = await workoutService.UpdateAsync(dto, id, userId, cancellationToken);
+            return Ok(workout);
         }
 
         [HttpDelete("{id}")]

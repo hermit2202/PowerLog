@@ -2,6 +2,7 @@ using AutoMapper;
 using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.Workout;
+using PowerLog.Core.Exceptions;
 using PowerLog.Core.Extensions;
 using PowerLog.Core.Models;
 
@@ -35,7 +36,7 @@ namespace PowerLog.Core.Services
 
             if (workout == null)
             {
-                throw new Exception("Такая тренировка не найдена.");
+                throw new NotFoundException("Такая тренировка не найдена.");
             }
 
             return mapper.Map<WorkoutDto>(workout);
@@ -60,7 +61,7 @@ namespace PowerLog.Core.Services
 
             if (workout == null)
             {
-                throw new Exception("Такая тренировка не найдена.");
+                throw new NotFoundException("Такая тренировка не найдена.");
             }
 
             mapper.Map(dto, workout);

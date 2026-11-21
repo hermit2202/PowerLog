@@ -30,57 +30,36 @@ namespace PowerLog.Api.Controllers
         public async Task<ActionResult<ExerciseDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            try
-            {
-                var dto = await exerciseService.GetByIdAsync(id, userId, cancellationToken);
-                return Ok(dto);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+
+            var dto = await exerciseService.GetByIdAsync(id, userId, cancellationToken);
+            return Ok(dto);
         }
 
         [HttpPost]
         public async Task<ActionResult<ExerciseDto>> Create(CreateExerciseDto dto, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            try
-            {
-                var exercise = await exerciseService.CreateAsync(dto, userId, cancellationToken);
-                return CreatedAtAction(nameof(GetById), new { id = exercise.ExerciseId }, exercise);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+
+            var exercise = await exerciseService.CreateAsync(dto, userId, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = exercise.ExerciseId }, exercise);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdateExerciseDto dto, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            try
-            {
-                var exercise = await exerciseService.UpdateAsync(id, dto, userId, cancellationToken);
-                return Ok(exercise);
-            }
-            catch (InvalidOperationException ex) { return Conflict(ex.Message); }
-            catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-            catch (UnauthorizedAccessException ex) { return StatusCode(403, ex.Message); }
+
+            var exercise = await exerciseService.UpdateAsync(id, dto, userId, cancellationToken);
+            return Ok(exercise);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            try
-            {
-                await exerciseService.DeleteAsync(id, userId, cancellationToken);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
-            catch (UnauthorizedAccessException ex) { return StatusCode(403, ex.Message); }
+
+            await exerciseService.DeleteAsync(id, userId, cancellationToken);
+            return NoContent();
         }
 
         private Guid GetCurrentUserId()
