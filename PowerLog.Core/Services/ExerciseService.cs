@@ -3,6 +3,7 @@ using PowerLog.Core.Contracts.Common;
 using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.Exercise;
+using PowerLog.Core.Exceptions;
 using PowerLog.Core.Models;
 
 namespace PowerLog.Core.Services
@@ -38,7 +39,7 @@ namespace PowerLog.Core.Services
 
             if (exercise == null)
             {
-                throw new KeyNotFoundException("Нет доступного упражнения с таким Id");
+                throw new NotFoundException("Нет доступного упражнения с таким Id");
             }
 
             return mapper.Map<ExerciseDto>(exercise);
@@ -49,7 +50,7 @@ namespace PowerLog.Core.Services
             var existsName = await exerciseRepository.NameExistsAsync(dto.Name, userId, null, cancellationToken);
             if (existsName)
             {
-                throw new InvalidOperationException("Упражнение с таким названием уже существует");
+                throw new ConflictException("Упражнение с таким названием уже существует");
             }
 
             var exercise = mapper.Map<Exercise>(dto);
@@ -71,7 +72,7 @@ namespace PowerLog.Core.Services
 
             if (existsName)
             {
-                throw new InvalidOperationException("Упражнение с таким названием уже существует");
+                throw new ConflictException("Упражнение с таким названием уже существует");
             }
 
             mapper.Map(dto, exercise);
@@ -108,12 +109,12 @@ namespace PowerLog.Core.Services
 
             if (exercise == null)
             {
-                throw new KeyNotFoundException("Нет доступного упражнения с таким Id");
+                throw new NotFoundException("Нет доступного упражнения с таким Id");
             }
 
             if (exercise.UserId == null)
             {
-                throw new UnauthorizedAccessException("Это системное упражнение");
+                throw new ForbiddenException("Это системное упражнение");
             }
 
             return exercise;

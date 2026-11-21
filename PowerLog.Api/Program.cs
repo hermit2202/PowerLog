@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PowerLog.Api.Handlers;
 using PowerLog.Api.Providers;
 using PowerLog.Core.Contracts.Common;
 using PowerLog.Core.Contracts.IData;
@@ -42,6 +43,9 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MappingProfile)));
 
 builder.Services.AddControllers();
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddCors(options =>
 {
@@ -85,6 +89,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 app.UseCors("AllowAll");
 

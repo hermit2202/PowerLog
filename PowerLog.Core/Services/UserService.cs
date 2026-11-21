@@ -2,6 +2,7 @@ using AutoMapper;
 using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.User;
+using PowerLog.Core.Exceptions;
 using PowerLog.Core.Models;
 
 namespace PowerLog.Core.Services
@@ -31,7 +32,7 @@ namespace PowerLog.Core.Services
 
             if (user == null)
             {
-                throw new Exception("Такой пользователь не найден.");
+                throw new NotFoundException("Такой пользователь не найден.");
             }
 
             return mapper.Map<UserDto>(user);
@@ -43,7 +44,7 @@ namespace PowerLog.Core.Services
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             {
-                throw new Exception("Неверный email или пароль.");
+                throw new UnauthorizedException("Неверный email или пароль.");
             }
 
             var token = authService.GenerateToken(user);
@@ -63,7 +64,7 @@ namespace PowerLog.Core.Services
 
             if (existingUser != null)
             {
-                throw new Exception("Пользователь с таким email уже существует.");
+                throw new ConflictException("Пользователь с таким email уже существует.");
             }
 
             var newUser = mapper.Map<User>(dto);

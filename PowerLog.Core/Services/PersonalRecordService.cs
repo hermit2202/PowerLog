@@ -3,6 +3,7 @@ using PowerLog.Core.Contracts.Common;
 using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.PersonalRecord;
+using PowerLog.Core.Exceptions;
 using PowerLog.Core.Models;
 
 namespace PowerLog.Core.Services
@@ -49,7 +50,7 @@ namespace PowerLog.Core.Services
 
             if (personalRecord == null)
             {
-                throw new KeyNotFoundException("Персональный рекорд не найден");
+                throw new NotFoundException("Персональный рекорд не найден");
             }
 
             return mapper.Map<PersonalRecordDto>(personalRecord);
@@ -63,7 +64,7 @@ namespace PowerLog.Core.Services
             var exercise = await exerciseRepository.GetAvailableByIdAsync(dto.ExerciseId, userId, cancellationToken);
             if (exercise == null)
             {
-                throw new KeyNotFoundException("Нет доступного упражнения с таким Id");
+                throw new NotFoundException("Нет доступного упражнения с таким Id");
             }
 
             var personalRecord = mapper.Map<PersonalRecord>(dto);
@@ -86,7 +87,7 @@ namespace PowerLog.Core.Services
 
             if (personalRecord == null)
             {
-                throw new KeyNotFoundException("Персональный рекорд не найден.");
+                throw new NotFoundException("Персональный рекорд не найден.");
             }
 
             mapper.Map(dto, personalRecord);
