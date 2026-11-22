@@ -12,6 +12,7 @@ using PowerLog.Core.Services;
 using PowerLog.Infrastructure;
 using PowerLog.Infrastructure.Persistence;
 using PowerLog.Core.Services.AutoMapper;
+using PowerLog.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,8 +114,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-if (app.Environment.IsDevelopment())
-{
     app.UseSwagger();
     app.UseSwaggerUI();
 }
