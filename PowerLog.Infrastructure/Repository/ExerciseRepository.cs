@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PowerLog.Core.Contracts.IData;
 using PowerLog.Core.Models;
 
-namespace PowerLog.Infrastructure;
+namespace PowerLog.Infrastructure.Repository;
 
 public class ExerciseRepository : BaseWriteRepository<Exercise>, IExerciseRepository
 {

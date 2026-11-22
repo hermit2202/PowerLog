@@ -12,6 +12,7 @@ using PowerLog.Core.Services;
 using PowerLog.Infrastructure;
 using PowerLog.Infrastructure.Persistence;
 using PowerLog.Core.Services.AutoMapper;
+using PowerLog.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,27 +95,27 @@ app.UseExceptionHandler();
 
 app.UseCors("AllowAll");
 
-// Seed данных
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<PowerLogContext>();
-
-    if (!context.Users.Any())
-    {
-        var testUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-        context.Users.Add(new User
-        {
-            UserId = testUserId,
-            UserName = "TestUser",
-            Email = "test@example.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
-        });
-        context.SaveChanges();
-    }
-}
-
 if (app.Environment.IsDevelopment())
 {
+    // Seed данных
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<PowerLogContext>();
+
+        if (!context.Users.Any())
+        {
+            var testUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            context.Users.Add(new User
+            {
+                UserId = testUserId,
+                UserName = "TestUser",
+                Email = "test@example.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+            });
+            context.SaveChanges();
+        }
+    }
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }

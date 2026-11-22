@@ -13,8 +13,9 @@ REST API для дневника тренировок по пауэрлифти�
 | Работа с БД | EF Core 10 (Code First), PostgreSQL в Docker Compose, миграции, имена таблиц и колонок в snake_case, аудит-поля (`CreatedAt/By`, `UpdatedAt/By`) заполняются автоматически в `SaveChangesAsync` |
 | Изоляция данных пользователей | Каждый пользователь видит системные упражнения и только свои; чужие данные недоступны (404), системные упражнения защищены от изменения (403) |
 | Сохранение истории | Гибридное удаление упражнений: неиспользованное удаляется физически, использованное в тренировках или рекордах — мягко (`IsDeleted`), история не теряется; связи с упражнениями защищены `Restrict` |
+| Обработка ошибок | Собственные исключения в бизнес-слое, глобальный `IExceptionHandler` переводит их в HTTP-коды; все ошибки возвращаются в едином формате `ProblemDetails` (`application/problem+json`), детали неожиданных ошибок только в логах |
+| Безопасность | JWT Bearer, пароли хешируются BCrypt; секретный ключ хранится вне репозитория (user-secrets / переменные окружения); email нормализуется и защищён уникальным индексом; тестовые данные создаются только в Development |
 | Паттерны доступа к данным | Repository + Unit of Work; чтение (`IReader`, `AsNoTracking`) отделено от записи (`IWriter`) |
-| Аутентификация | JWT Bearer, пароли хешируются BCrypt |
 | Тестируемость | Зависимости от времени и текущего пользователя вынесены в `IDateTimeProvider` и `IIdentityProvider`; все даты хранятся в UTC |
 | Контракты API | DTO отделены от доменных моделей, маппинг через AutoMapper, валидация через Data Annotations, документация в Swagger |
 
@@ -29,8 +30,8 @@ REST API для дневника тренировок по пауэрлифти�
 ## Архитектура
 
 ```
-PowerLog.Api             Контроллеры, Program.cs (DI, JWT, CORS, Swagger), провайдеры времени и пользователя
-PowerLog.Core            Модели, DTO, интерфейсы репозиториев и сервисов, сервисы с бизнес-логикой, профиль маппинга
+PowerLog.Api             Контроллеры, Program.cs (DI, JWT, CORS, Swagger), обработчик ошибок, провайдеры времени и пользователя
+PowerLog.Core            Модели, DTO, интерфейсы репозиториев и сервисов, сервисы с бизнес-логикой, исключения, профиль маппинга
 PowerLog.Infrastructure  DbContext, репозитории, Reader/Writer/UnitOfWork, миграции EF Core
 ```
 
@@ -63,20 +64,24 @@ cd PowerLog
 # 1. поднять PostgreSQL в контейнере
 docker compose up -d
 
-# 2. восстановить dotnet-ef (версия закреплена в dotnet-tools.json) и применить миграции
+# 2. задать секретный ключ для подписи JWT (один раз на компьютере, не короче 32 символов)
+dotnet user-secrets set "JwtSettings:SecretKey" "<случайная строка не короче 32 символов>" --project PowerLog.Api
+
+# 3. восстановить dotnet-ef (версия закреплена в dotnet-tools.json) и применить миграции
 dotnet tool restore
 dotnet ef database update --project PowerLog.Infrastructure --startup-project PowerLog.Api
 
-# 3. запустить API
+# 4. запустить API
 dotnet run --project PowerLog.Api
 ```
 
 Swagger UI (в режиме Development): http://localhost:5152/swagger
 
 Строка подключения для локальной разработки лежит в `appsettings.Development.json` и совпадает с настройками из `docker-compose.yml`.
-При первом запуске создаётся тестовый пользователь `test@example.com` / `password123`.
+Секретный ключ JWT в репозитории не хранится: без шага 2 приложение не запустится и сообщит, что ключ не настроен.
+При первом запуске в режиме Development создаётся тестовый пользователь `test@example.com` / `password123`.
 
-Для другого окружения строку подключения и JWT-ключ (не короче 32 символов) можно передать через переменные окружения:
+Для другого окружения строку подключения и JWT-ключ можно передать через переменные окружения:
 
 ```bash
 export ConnectionStrings__DefaultConnection="Host=<хост>;Port=5432;Database=powerlog;Username=<пользователь>;Password=<пароль>"
@@ -102,11 +107,12 @@ curl -X POST http://localhost:5152/api/exercises \
   -d '{"name":"Жим гантелей","type":3}'
 ```
 
-Полный сценарий проверки API (изоляция пользователей, коды 403/404/409, мягкое удаление) — в файле `PowerLog.Api/PowerLog.Api.http`, запускается из Rider или VS Code.
+Полный сценарий проверки API (изоляция пользователей, коды 401/403/404/409, мягкое удаление, нормализация email) — в файле `PowerLog.Api/PowerLog.Api.http`, запускается из Rider или VS Code на чистой базе (`docker compose down -v`, затем шаги 1, 3 и 4).
 
 ## API
 
 Все эндпоинты, кроме регистрации и входа, требуют заголовок `Authorization: Bearer <token>`.
+Ошибки возвращаются в формате `ProblemDetails` (`application/problem+json`).
 
 | Ресурс | Методы |
 |---|---|
@@ -124,6 +130,7 @@ curl -X POST http://localhost:5152/api/exercises \
 - Гибридное (мягкое) удаление упражнений с сохранением истории
 - PostgreSQL в Docker Compose, миграции БД, автоматический аудит изменений
 - Единая обработка ошибок (`ProblemDetails`) и валидация
+- Секреты вне репозитория, уникальный нормализованный email, seed только в Development
 
 **В работе**
 - API для упражнений внутри тренировки и подходов (сущности и репозитории готовы, сервисов и эндпоинтов пока нет)

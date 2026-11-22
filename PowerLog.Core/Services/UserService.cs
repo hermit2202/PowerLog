@@ -40,7 +40,8 @@ namespace PowerLog.Core.Services
 
         public async Task<LoginResponseDto> Login(LoginDto dto, CancellationToken cancellationToken = default)
         {
-            var user = await userRepository.GetByEmailAsync(dto.Email, cancellationToken);
+            var normalizedEmail = NormalizeEmail(dto.Email);
+            var user = await userRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             {
@@ -60,7 +61,8 @@ namespace PowerLog.Core.Services
 
         public async Task<UserDto> Register(RegisterDto dto, CancellationToken cancellationToken = default)
         {
-            var existingUser = await userRepository.GetByEmailAsync(dto.Email, cancellationToken);
+            var normalizedEmail = NormalizeEmail(dto.Email);
+            var existingUser = await userRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
             if (existingUser != null)
             {
@@ -68,12 +70,18 @@ namespace PowerLog.Core.Services
             }
 
             var newUser = mapper.Map<User>(dto);
+            newUser.Email = normalizedEmail;
             newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
             userRepository.Add(newUser);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return mapper.Map<UserDto>(newUser);
+        }
+
+        private static string NormalizeEmail(string email)
+        {
+            return email.ToLowerInvariant().Trim();
         }
     }
 }

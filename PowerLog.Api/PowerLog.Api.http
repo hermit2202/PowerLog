@@ -164,3 +164,15 @@ Content-Type: application/json
 ### 24. Несуществующая тренировка — ожидаем 404
 GET {{host}}/api/workouts/00000000-0000-0000-0000-000000000099
 Authorization: Bearer {{token1}}
+
+### 25. Регистрация с тем же email в другом регистре и с пробелами — ожидаем 409
+POST {{host}}/api/users/register
+Content-Type: application/json
+
+{"userName":"dup","email":"  TEST@Example.com ","password":"password123"}
+
+### 26. Вход с email в другом регистре — ожидаем 200
+POST {{host}}/api/users/login
+Content-Type: application/json
+
+{"email":"Test@EXAMPLE.com","password":"password123"}
