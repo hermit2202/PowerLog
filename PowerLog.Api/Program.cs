@@ -95,24 +95,26 @@ app.UseExceptionHandler();
 
 app.UseCors("AllowAll");
 
-// Seed данных
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsDevelopment())
 {
-    var context = scope.ServiceProvider.GetRequiredService<PowerLogContext>();
-
-    if (!context.Users.Any())
+    // Seed данных
+    using (var scope = app.Services.CreateScope())
     {
-        var testUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-        context.Users.Add(new User
+        var context = scope.ServiceProvider.GetRequiredService<PowerLogContext>();
+
+        if (!context.Users.Any())
         {
-            UserId = testUserId,
-            UserName = "TestUser",
-            Email = "test@example.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
-        });
-        context.SaveChanges();
+            var testUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            context.Users.Add(new User
+            {
+                UserId = testUserId,
+                UserName = "TestUser",
+                Email = "test@example.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+            });
+            context.SaveChanges();
+        }
     }
-}
 
     app.UseSwagger();
     app.UseSwaggerUI();

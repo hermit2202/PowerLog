@@ -45,6 +45,10 @@ namespace PowerLog.Infrastructure.Persistence
                 .HasForeignKey(we => we.ExerciseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
             modelBuilder.Entity<Exercise>()
                 .HasData(
                     new Exercise

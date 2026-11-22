@@ -209,6 +209,10 @@ namespace PowerLog.Infrastructure.Migrations
                     b.HasKey("UserId")
                         .HasName("pk_users");
 
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_email");
+
                     b.ToTable("users", (string)null);
                 });
 
