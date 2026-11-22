@@ -1,6 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PowerLog.Api.Extensions;
 using PowerLog.Core.Contracts.IServices;
 using PowerLog.Core.DTOs.PersonalRecord;
 
@@ -21,7 +21,7 @@ namespace PowerLog.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PersonalRecordDto>>> GetAll(Guid exerciseId, CancellationToken cancellationToken)
         {
-            var userId = GetCurrentUserId();
+            var userId = User.GetUserId();
 
             var personalRecords = await personalRecordService.GetAllPersonalRecordsAsync(userId, exerciseId, cancellationToken);
             return Ok(personalRecords);
@@ -30,7 +30,7 @@ namespace PowerLog.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<PersonalRecordDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var userId = GetCurrentUserId();
+            var userId = User.GetUserId();
 
             var dto = await personalRecordService.GetPersonalRecordByIdAsync(id, userId, cancellationToken);
             return Ok(dto);
@@ -39,7 +39,7 @@ namespace PowerLog.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<PersonalRecordDto>> Create(CreatePersonalRecordDto dto, CancellationToken cancellationToken)
         {
-            var userId = GetCurrentUserId();
+            var userId = User.GetUserId();
 
             var personalRecord = await personalRecordService.CreatePersonalRecordAsync(dto, userId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = personalRecord.PersonalRecordId }, personalRecord);
@@ -48,7 +48,7 @@ namespace PowerLog.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdatePersonalRecordDto dto, CancellationToken cancellationToken)
         {
-            var userId = GetCurrentUserId();
+            var userId = User.GetUserId();
 
             await personalRecordService.UpdatePersonalRecordAsync(dto, id, userId, cancellationToken);
             return NoContent();
@@ -57,21 +57,13 @@ namespace PowerLog.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            var userId = GetCurrentUserId();
+            var userId = User.GetUserId();
             var success = await personalRecordService.DeletePersonalRecordAsync(id, userId, cancellationToken);
             if (!success)
             {
                 return NotFound();
             }
             return NoContent();
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            return Guid.Parse(
-                User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? throw new InvalidOperationException("User ID not found in token.")
-            );
         }
     }
 }

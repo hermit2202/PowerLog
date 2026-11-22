@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using PowerLog.Api.Extensions;
 using PowerLog.Core.Contracts.Common;
 
 namespace PowerLog.Api.Providers;
@@ -12,14 +12,5 @@ public class IdentityProvider : IIdentityProvider
         this.httpContextAccessor = httpContextAccessor;
     }
 
-    public Guid? CurrentUserId
-    {
-        get
-        {
-            var userIdClaim = httpContextAccessor.HttpContext?.User
-                ?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-            return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
-        }
-    }
+    public Guid? CurrentUserId => httpContextAccessor.HttpContext?.User.FindUserId();
 }
