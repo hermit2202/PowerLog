@@ -60,13 +60,19 @@ public class ExerciseServiceTests
     public async Task DeleteAsync_UnusedExercise_DeletesPhysically()
     {
         // Arrange
-
+        var userId = Guid.NewGuid();
+        var exerciseId = Guid.NewGuid();
+        var exercise = new Exercise{ ExerciseId =  exerciseId, UserId =  userId, Name = "Тестовое упражнение"};
+        repository.GetAvailableByIdAsync(exerciseId, userId, Arg.Any<CancellationToken>()).Returns(exercise);
+        repository.IsUsedAsync(exerciseId, Arg.Any<CancellationToken>()).Returns(false);
 
         //Act
-
+        await sut.DeleteAsync(exerciseId, userId);
 
         // Assert
-
+        repository.Received().Delete(exercise);
+        repository.DidNotReceive().Update(Arg.Any<Exercise>());
+        await unitOfWork.Received().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
