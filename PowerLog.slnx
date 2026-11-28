@@ -2,4 +2,5 @@
   <Project Path="PowerLog.Api/PowerLog.Api.csproj" />
   <Project Path="PowerLog.Core/PowerLog.Core.csproj" />
   <Project Path="PowerLog.Infrastructure/PowerLog.Infrastructure.csproj" />
+  <Project Path="PowerLog.UnitTests/PowerLog.UnitTests.csproj" />
 </Solution>
