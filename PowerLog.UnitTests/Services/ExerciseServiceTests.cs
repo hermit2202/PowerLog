@@ -79,12 +79,60 @@ public class ExerciseServiceTests
     public async Task DeleteAsync_UsedExercise_SoftDeletes()
     {
         // Arrange
+        var userId = Guid.NewGuid();
+        var exerciseId = Guid.NewGuid();
+        var date = new DateTime(2026, 11, 28, 12, 0, 0, DateTimeKind.Utc);
+        var exercise = new Exercise{ ExerciseId =  exerciseId, UserId =  userId, Name = "Тестовое упражнение"};
+        repository.GetAvailableByIdAsync(exerciseId, userId, Arg.Any<CancellationToken>()).Returns(exercise);
+        repository.IsUsedAsync(exerciseId, Arg.Any<CancellationToken>()).Returns(true);
+        dateTimeProvider.UtcNow.Returns(date);
 
+        //Act
+        await sut.DeleteAsync(exerciseId, userId);
+
+        // Assert
+        repository.Received().Update(exercise);
+        repository.DidNotReceive().Delete(Arg.Any<Exercise>());
+        Assert.Equal(date, exercise.DeletedAt);
+        Assert.True(exercise.IsDeleted);
+        await unitOfWork.Received().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ExerciseNotFound_ThrowsNotFound()
+    {
+        // Arrange
 
         //Act
 
+        // Assert
+    }
+
+    [Fact]
+    public async Task UpdateAsync_SystemExercise_ThrowsForbidden()
+    {
+        // Arrange
+
+        // Act & Assert
+
+    }
+
+    [Fact]
+    public async Task UpdateAsync_NameAlreadyExists_ThrowsConflict()
+    {
+        // Arrange
+
+        // Act & Assert
+
+    }
+
+    [Fact(Skip = "TODO")]
+    public async Task UpdateAsync_ValidData_UpdatesAndSaves()
+    {
+        // Arrange
+
+        //Act
 
         // Assert
-
     }
 }
